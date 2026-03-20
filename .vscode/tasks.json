@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🚀 배포하기",
+      "type": "shell",
+      "command": "node scripts/release.js",
+      "problemMatcher": []
+    }
+  ]
+}
