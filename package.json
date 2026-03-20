@@ -56,7 +56,9 @@
     "publish": {
       "provider": "github",
       "owner": "zaolee",
-      "repo": "jafm-electron"
+      "repo": "jafm-electron",
+      "draft": false,
+      "prerelease": false
     },
     "nsis": {
       "oneClick": false,
