@@ -1,7 +1,7 @@
 {
   "name": "jafm",
   "productName": "자금일보 관리 시스템",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "소규모 기업용 자금일보 관리 프로그램",
   "main": "src/main.js",
   "author": "zaoLee",
