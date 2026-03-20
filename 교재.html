@@ -1,0 +1,2662 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>JavaScript 학습 교재 — 자금일보 소스 기반</title>
+<style>
+  /* ── 기본 ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1e40af;
+    --accent: #f59e0b;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --code-bg: #0f172a;
+    --code-text: #e2e8f0;
+    --green: #16a34a;
+    --red: #dc2626;
+    --yellow-bg: #fefce8;
+    --yellow-border: #fde68a;
+    --blue-bg: #eff6ff;
+    --blue-border: #bfdbfe;
+  }
+  body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.8; }
+
+  /* ── 표지 ── */
+  .cover {
+    min-height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 60px 40px; page-break-after: always;
+  }
+  .cover-badge { background: var(--accent); color: #000; font-size: 13px; font-weight: 700; padding: 6px 18px; border-radius: 99px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 40px; }
+  .cover h1 { font-size: 52px; font-weight: 900; color: #fff; line-height: 1.2; margin-bottom: 16px; }
+  .cover h1 span { color: var(--accent); }
+  .cover-sub { font-size: 22px; color: #93c5fd; margin-bottom: 60px; font-weight: 300; }
+  .cover-divider { width: 80px; height: 3px; background: var(--accent); margin: 0 auto 60px; }
+  .cover-info { display: flex; gap: 48px; justify-content: center; }
+  .cover-info-item { text-align: center; }
+  .cover-info-item .num { font-size: 42px; font-weight: 900; color: var(--accent); }
+  .cover-info-item .lbl { font-size: 14px; color: #93c5fd; margin-top: 4px; }
+  .cover-footer { position: absolute; bottom: 40px; font-size: 13px; color: #475569; }
+  .cover-tag { display: flex; gap: 10px; justify-content: center; margin-top: 40px; flex-wrap: wrap; }
+  .cover-tag span { background: rgba(255,255,255,.1); color: #93c5fd; font-size: 13px; padding: 6px 14px; border-radius: 6px; border: 1px solid rgba(255,255,255,.15); }
+
+  /* ── 목차 ── */
+  .toc-page { max-width: 800px; margin: 0 auto; padding: 80px 40px; page-break-after: always; }
+  .toc-page h2 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+  .toc-page .toc-sub { color: var(--text-muted); margin-bottom: 48px; font-size: 15px; }
+  .toc-phase { margin-bottom: 40px; }
+  .toc-phase-title { font-size: 13px; font-weight: 700; color: var(--primary); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+  .toc-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); gap: 16px; }
+  .toc-num { width: 32px; height: 32px; background: var(--primary); color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .toc-item-text { flex: 1; }
+  .toc-item-title { font-weight: 600; font-size: 16px; }
+  .toc-item-desc { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .toc-page-num { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+
+  /* ── 챕터 ── */
+  .chapter { max-width: 800px; margin: 0 auto; padding: 80px 40px; page-break-before: always; }
+  .chapter-header { margin-bottom: 48px; }
+  .chapter-phase { font-size: 12px; font-weight: 700; color: var(--primary); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+  .chapter-num { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
+  .chapter h2 { font-size: 36px; font-weight: 800; line-height: 1.3; margin-bottom: 12px; }
+  .chapter-desc { font-size: 17px; color: var(--text-muted); line-height: 1.7; }
+  .chapter-divider { height: 4px; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 2px; margin: 32px 0; }
+
+  /* ── 섹션 ── */
+  .section { margin-bottom: 48px; }
+  .section h3 { font-size: 22px; font-weight: 700; margin-bottom: 16px; padding-left: 14px; border-left: 4px solid var(--primary); }
+  .section h4 { font-size: 17px; font-weight: 700; margin: 24px 0 12px; color: var(--primary-dark); }
+  .section p { margin-bottom: 16px; line-height: 1.8; }
+
+  /* ── 코드블록 ── */
+  .code-wrap { margin: 20px 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,.12); }
+  .code-label { background: #1e293b; color: #64748b; font-size: 12px; padding: 8px 16px; font-family: monospace; display: flex; justify-content: space-between; align-items: center; }
+  .code-label .lang { color: var(--accent); font-weight: 700; }
+  pre { background: var(--code-bg); color: var(--code-text); padding: 24px; overflow-x: auto; font-family: 'Consolas', 'D2Coding', monospace; font-size: 14px; line-height: 1.7; }
+  .kw  { color: #93c5fd; }  /* 키워드 */
+  .fn  { color: #fbbf24; }  /* 함수명 */
+  .str { color: #86efac; }  /* 문자열 */
+  .cm  { color: #475569; font-style: italic; }  /* 주석 */
+  .num { color: #f9a8d4; }  /* 숫자 */
+  .tp  { color: #67e8f9; }  /* 타입 */
+  .hl  { background: rgba(251,191,36,.15); display: block; margin: 0 -24px; padding: 0 24px; }  /* 하이라이트 */
+
+  /* ── 비교표 ── */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+  .compare-box { border-radius: 10px; overflow: hidden; }
+  .compare-box .compare-title { padding: 10px 16px; font-size: 13px; font-weight: 700; letter-spacing: 1px; }
+  .compare-box.java .compare-title { background: #dc262620; color: #dc2626; }
+  .compare-box.js   .compare-title { background: #16a34a20; color: #16a34a; }
+  .compare-box pre  { border-radius: 0; font-size: 13px; }
+
+  /* ── 콜아웃 ── */
+  .callout { border-radius: 10px; padding: 18px 20px; margin: 20px 0; display: flex; gap: 14px; }
+  .callout-icon { font-size: 22px; flex-shrink: 0; line-height: 1; }
+  .callout-body h4 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .callout-body p  { font-size: 14px; line-height: 1.7; margin: 0; }
+  .callout.tip  { background: var(--blue-bg);   border: 1px solid var(--blue-border); }
+  .callout.warn { background: var(--yellow-bg); border: 1px solid var(--yellow-border); }
+  .callout.good { background: #f0fdf4; border: 1px solid #bbf7d0; }
+
+  /* ── 표 ── */
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 15px; }
+  th { background: var(--primary); color: #fff; padding: 12px 16px; text-align: left; font-weight: 600; }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  tr:nth-child(even) td { background: var(--bg); }
+  .badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+  .badge.green { background: #dcfce7; color: #16a34a; }
+  .badge.red   { background: #fee2e2; color: #dc2626; }
+  .badge.blue  { background: #dbeafe; color: #2563eb; }
+
+  /* ── 인라인 코드 ── */
+  code { background: #f1f5f9; color: #be185d; padding: 2px 7px; border-radius: 4px; font-size: 14px; font-family: 'Consolas', monospace; }
+
+  /* ── 연습문제 ── */
+  .exercise { background: var(--card); border: 2px solid var(--primary); border-radius: 12px; padding: 24px; margin: 32px 0; }
+  .exercise-title { font-size: 13px; font-weight: 700; color: var(--primary); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+  .exercise h4 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+  .exercise ol { padding-left: 20px; }
+  .exercise li { margin-bottom: 8px; font-size: 15px; }
+  .exercise .hint { margin-top: 16px; padding: 12px 16px; background: var(--bg); border-radius: 8px; font-size: 14px; color: var(--text-muted); }
+
+  /* ── 인쇄 ── */
+  @media print {
+    body { background: #fff; }
+    .cover { page-break-after: always; }
+    .chapter { page-break-before: always; }
+    .code-wrap { box-shadow: none; border: 1px solid #e2e8f0; }
+    .no-print { display: none; }
+  }
+
+  /* ── 플로팅 버튼 ── */
+  .float-btn { position: fixed; bottom: 32px; right: 32px; background: var(--primary); color: #fff; border: none; border-radius: 12px; padding: 14px 24px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(37,99,235,.4); font-family: inherit; display: flex; align-items: center; gap: 8px; z-index: 100; }
+  .float-btn:hover { background: var(--primary-dark); }
+</style>
+</head>
+<body>
+
+<!-- 표지 -->
+<div class="cover" style="position:relative;">
+  <div class="cover-badge">JavaScript 완전 정복</div>
+  <h1>Java 개발자를 위한<br><span>JavaScript</span> 교재</h1>
+  <div class="cover-sub">자금일보 소스코드로 배우는 실전 JS</div>
+  <div class="cover-divider"></div>
+  <div class="cover-info">
+    <div class="cover-info-item"><div class="num">3</div><div class="lbl">Phase</div></div>
+    <div class="cover-info-item"><div class="num">12</div><div class="lbl">회차</div></div>
+    <div class="cover-info-item"><div class="num">실전</div><div class="lbl">소스 기반</div></div>
+  </div>
+  <div class="cover-tag">
+    <span>Vanilla JS</span><span>Electron</span><span>React 비교</span><span>Git & 배포</span>
+  </div>
+  <div class="cover-footer">자금일보 관리 시스템 소스 기반 · 2026</div>
+</div>
+
+<!-- 목차 -->
+<div class="toc-page">
+  <h2>목차</h2>
+  <p class="toc-sub">Java 경험을 바탕으로 JS를 빠르게 정복하는 12회차 커리큘럼</p>
+
+  <div class="toc-phase">
+    <div class="toc-phase-title">Phase 1 — JS 핵심</div>
+    <div class="toc-item"><div class="toc-num">1</div><div class="toc-item-text"><div class="toc-item-title">Java vs JS — 변수·함수·타입</div><div class="toc-item-desc">state.js, utils.js 기반 · Java와 다른 점만 집중</div></div></div>
+    <div class="toc-item" style="background:#fffbeb; border-radius:8px; padding: 12px 0 12px 12px;"><div class="toc-num" style="background:#f59e0b;">★</div><div class="toc-item-text"><div class="toc-item-title" style="color:#b45309;">특별 챕터 — 람다(Lambda) 완전 정복</div><div class="toc-item-desc">Java 람다 → JavaScript 화살표 함수 연결고리</div></div></div>
+    <div class="toc-item"><div class="toc-num">2</div><div class="toc-item-text"><div class="toc-item-title">배열 메서드 — map·filter·reduce·find</div><div class="toc-item-desc">transactions 배열로 배우는 함수형 프로그래밍</div></div></div>
+    <div class="toc-item"><div class="toc-num">3</div><div class="toc-item-text"><div class="toc-item-title">비동기 — Promise·async/await</div><div class="toc-item-desc">data.js, export.js 기반 · 콜백 지옥 탈출</div></div></div>
+    <div class="toc-item"><div class="toc-num">4</div><div class="toc-item-text"><div class="toc-item-title">모던 JS 문법 — 구조분해·스프레드·옵셔널체이닝</div><div class="toc-item-desc">소스 전반에 쓰인 현대 문법 총정리</div></div></div>
+    <div class="toc-item"><div class="toc-num">5</div><div class="toc-item-text"><div class="toc-item-title">DOM 조작 — 이벤트·innerHTML·querySelector</div><div class="toc-item-desc">render.js, transactions.js 기반</div></div></div>
+  </div>
+
+  <div class="toc-phase">
+    <div class="toc-phase-title">Phase 2 — React 제대로</div>
+    <div class="toc-item"><div class="toc-num">6</div><div class="toc-item-text"><div class="toc-item-title">왜 React인가 — Vanilla JS의 한계</div><div class="toc-item-desc">이 소스와 React 코드 직접 비교</div></div></div>
+    <div class="toc-item"><div class="toc-num">7</div><div class="toc-item-text"><div class="toc-item-title">컴포넌트·JSX·props·state</div><div class="toc-item-desc">감으로 하던 React를 원리로 이해</div></div></div>
+    <div class="toc-item"><div class="toc-num">8</div><div class="toc-item-text"><div class="toc-item-title">useEffect·useState 원리</div><div class="toc-item-desc">생명주기와 사이드이펙트 이해</div></div></div>
+    <div class="toc-item"><div class="toc-num">9</div><div class="toc-item-text"><div class="toc-item-title">자금일보를 React로 바꾸면?</div><div class="toc-item-desc">실제 Vanilla JS 코드를 React로 변환하며 이해</div></div></div>
+  </div>
+
+  <div class="toc-phase">
+    <div class="toc-phase-title">Phase 3 — Git · 빌드 · 배포</div>
+    <div class="toc-item"><div class="toc-num">10</div><div class="toc-item-text"><div class="toc-item-title">Git 기초 — commit·branch·push</div><div class="toc-item-desc">버전 관리의 기본 개념과 실습</div></div></div>
+    <div class="toc-item"><div class="toc-num">11</div><div class="toc-item-text"><div class="toc-item-title">Electron 빌드 — 설치 파일 만들기</div><div class="toc-item-desc">electron-builder로 Windows installer 생성</div></div></div>
+    <div class="toc-item"><div class="toc-num">12</div><div class="toc-item-text"><div class="toc-item-title">GitHub Actions — 자동 빌드·배포</div><div class="toc-item-desc">push하면 자동으로 installer 생성되는 파이프라인</div></div></div>
+  </div>
+</div>
+
+<!-- ======================== CHAPTER 1 ======================== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-phase">Phase 1 — JS 핵심</div>
+    <div class="chapter-num">Chapter 01</div>
+    <h2>Java vs JS<br>변수 · 함수 · 타입</h2>
+    <p class="chapter-desc">Java를 알면 JS의 절반은 이미 압니다. 나머지 절반, 다른 점만 빠르게 정리합니다.</p>
+    <div class="chapter-divider"></div>
+  </div>
+
+  <div class="section">
+    <h3>1. 변수 선언</h3>
+    <p>Java는 타입을 명시하고 선언합니다. JS는 타입 없이 <code>const</code> / <code>let</code>으로 선언합니다.</p>
+
+    <div class="compare">
+      <div class="compare-box java">
+        <div class="compare-title">☕ Java</div>
+        <pre><span class="tp">String</span> name = <span class="str">"자금일보"</span>;
+<span class="tp">int</span> amount = <span class="num">50000</span>;
+<span class="tp">boolean</span> isNew = <span class="kw">true</span>;
+
+<span class="cm">// final = 상수 (재할당 불가)</span>
+<span class="kw">final</span> <span class="tp">String</span> APP = <span class="str">"jafm"</span>;</pre>
+      </div>
+      <div class="compare-box js">
+        <div class="compare-title">🟨 JavaScript</div>
+        <pre><span class="kw">let</span> name = <span class="str">"자금일보"</span>;
+<span class="kw">let</span> amount = <span class="num">50000</span>;
+<span class="kw">let</span> isNew = <span class="kw">true</span>;
+
+<span class="cm">// const = 상수 (재할당 불가)</span>
+<span class="kw">const</span> APP = <span class="str">"jafm"</span>;</pre>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <h4>const vs let 언제 쓰나?</h4>
+        <p>나중에 값이 바뀔 변수 → <code>let</code> / 바뀌지 않을 변수 → <code>const</code><br>
+        실제 소스에서 <code>transactions</code>는 배열 자체를 교체하므로 <code>let</code>, <code>isElectron</code>은 한 번 정해지면 바뀌지 않으므로 <code>const</code>를 사용했습니다.</p>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label"><span>실제 소스 — state.js</span><span class="lang">JS</span></div>
+      <pre><span class="cm">// 거래내역은 계속 추가/삭제되므로 let</span>
+<span class="kw">let</span> transactions = [];
+
+<span class="cm">// Electron 여부는 앱 실행 중 변하지 않으므로 const</span>
+<span class="kw">const</span> isElectron = <span class="kw">typeof</span> window.electronAPI !== <span class="str">'undefined'</span>;</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>2. 함수 선언 — 3가지 방식</h3>
+    <p>Java는 메서드 하나뿐이지만 JS는 함수를 선언하는 방식이 3가지입니다.</p>
+
+    <div class="code-wrap">
+      <div class="code-label"><span>함수 선언 3가지</span><span class="lang">JS</span></div>
+      <pre><span class="cm">// ① 함수 선언문 (Java 메서드와 가장 비슷, 호이스팅 됨)</span>
+<span class="kw">function</span> <span class="fn">calcBalance</span>() {
+  <span class="kw">return</span> <span class="num">50000</span>;
+}
+
+<span class="cm">// ② 함수 표현식 (변수에 함수를 담음)</span>
+<span class="kw">const</span> <span class="fn">calcBalance</span> = <span class="kw">function</span>() {
+  <span class="kw">return</span> <span class="num">50000</span>;
+};
+
+<span class="cm">// ③ 화살표 함수 (가장 많이 씀, this 바인딩 없음)</span>
+<span class="kw">const</span> <span class="fn">calcBalance</span> = () => <span class="num">50000</span>;
+
+<span class="cm">// 화살표 함수 — 한 줄이면 return 생략 가능</span>
+<span class="kw">const</span> <span class="fn">double</span> = (n) => n * <span class="num">2</span>;
+<span class="kw">const</span> <span class="fn">add</span>    = (a, b) => a + b;</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label"><span>실제 소스 — accounts.js</span><span class="lang">JS</span></div>
+      <pre><span class="cm">// ① 선언문: 이름이 있고 독립적인 로직</span>
+<span class="kw">function</span> <span class="fn">calcBalance</span>() {
+  <span class="kw">const</span> bal = {};
+  ACCOUNTS.<span class="fn">forEach</span>(a => bal[a.key] = INIT_BALANCE[a.key] || <span class="num">0</span>);
+  <span class="kw">return</span> bal;
+}
+
+<span class="cm">// ③ 화살표 함수: forEach, map 등 콜백으로 자주 사용</span>
+ACCOUNTS.<span class="fn">forEach</span>(a => {
+  <span class="cm">// a는 각 계좌 객체 — Java의 for-each와 동일</span>
+  total += bal[a.key] || <span class="num">0</span>;
+});</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>3. 타입 시스템 — 동적 타입</h3>
+    <p>Java는 컴파일 시점에 타입을 검사합니다. JS는 런타임에 타입이 결정됩니다.</p>
+
+    <table>
+      <tr><th>Java 타입</th><th>JS 대응</th><th>비고</th></tr>
+      <tr><td><code>String</code></td><td><code>string</code></td><td>큰따옴표·작은따옴표·백틱 모두 가능</td></tr>
+      <tr><td><code>int / double</code></td><td><code>number</code></td><td>정수·소수 구분 없음</td></tr>
+      <tr><td><code>boolean</code></td><td><code>boolean</code></td><td>동일</td></tr>
+      <tr><td><code>null</code></td><td><code>null / undefined</code></td><td>JS는 두 가지가 있음</td></tr>
+      <tr><td><code>Object</code></td><td><code>object</code></td><td>배열·객체·함수 모두 object</td></tr>
+      <tr><td><code>List&lt;T&gt;</code></td><td><code>Array</code></td><td><code>[]</code>로 선언</td></tr>
+    </table>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <h4>null vs undefined</h4>
+        <p><code>null</code> = 개발자가 의도적으로 "없음"을 지정<br>
+        <code>undefined</code> = 아직 값이 할당되지 않은 상태 (Java의 선언만 한 변수와 비슷)</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>4. 객체 (Object) — Java의 Map/DTO와 비슷</h3>
+    <p>JS의 객체는 Java의 <code>HashMap</code>이나 DTO 클래스처럼 씁니다.</p>
+
+    <div class="compare">
+      <div class="compare-box java">
+        <div class="compare-title">☕ Java</div>
+        <pre><span class="cm">// DTO 클래스 정의 필요</span>
+<span class="kw">class</span> <span class="tp">Transaction</span> {
+  <span class="tp">String</span> id;
+  <span class="tp">String</span> date;
+  <span class="tp">String</span> type;
+  <span class="tp">int</span>    amount;
+}</pre>
+      </div>
+      <div class="compare-box js">
+        <div class="compare-title">🟨 JavaScript</div>
+        <pre><span class="cm">// 클래스 없이 바로 객체 생성</span>
+<span class="kw">const</span> tx = {
+  id:     <span class="str">'uuid-xxx'</span>,
+  date:   <span class="str">'2026-03-19'</span>,
+  type:   <span class="str">'입금'</span>,
+  amount: <span class="num">50000</span>
+};</pre>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-label"><span>실제 소스 — transactions.js</span><span class="lang">JS</span></div>
+      <pre><span class="cm">// 객체를 배열에 바로 추가 — 클래스 인스턴스화 불필요</span>
+transactions.<span class="fn">push</span>({
+  id:      crypto.<span class="fn">randomUUID</span>(),   <span class="cm">// UUID 자동 생성</span>
+  date,                              <span class="cm">// date: date 와 동일 (단축 표기)</span>
+  account,
+  type,
+  amount,
+  desc,
+  note
+});</pre>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <h4>단축 속성명 (Shorthand Property)</h4>
+        <p>변수명과 키 이름이 같으면 <code>{ date: date }</code> 대신 <code>{ date }</code>로 줄여 쓸 수 있습니다. 소스 전반에 자주 등장합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">✏️ 연습문제</div>
+    <h4>Chapter 01 확인 문제</h4>
+    <ol>
+      <li><code>let</code>과 <code>const</code>의 차이는? 언제 각각 사용하나요?</li>
+      <li>화살표 함수 <code>(a, b) => a + b</code>를 일반 함수 선언문으로 바꿔보세요.</li>
+      <li>아래 코드에서 <code>type: '입금'</code>을 단축 속성명으로 바꾸려면 어떻게 해야 하나요?</li>
+    </ol>
+    <div class="code-wrap" style="margin-top:16px;">
+      <pre><span class="kw">const</span> type = <span class="str">'입금'</span>;
+<span class="kw">const</span> tx = { type: type, amount: <span class="num">1000</span> };
+<span class="cm">// ↑ 단축 속성명으로 바꾸면?</span></pre>
+    </div>
+    <div class="hint">💡 힌트: 변수명과 키 이름이 같을 때 단축 표기가 가능합니다.</div>
+  </div>
+</div>
+
+<!-- ======================== 특별 챕터: 람다 ======================== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-phase">Phase 1.5 — Java to JavaScript</div>
+    <div class="chapter-num">특별 챕터</div>
+    <h2>람다(Lambda) 완전 정복</h2>
+    <p class="chapter-desc">Java 람다부터 JavaScript 화살표 함수까지, "메서드를 변수처럼 다루는" 개념을 실무 예제로 완벽하게 이해합니다.</p>
+    <div class="chapter-divider"></div>
+  </div>
+
+  <div class="section">
+    <h3>1. 람다가 뭔데? (기본 개념)</h3>
+    <p>람다는 <strong>"메서드를 변수처럼 다루는 문법"</strong>입니다. 예전에는 간단한 로직 하나 쓰려고 클래스를 만들어야 했는데, 람다는 그걸 한 줄로 줄여줍니다.</p>
+
+    <h4>예전 방식 vs 람다</h4>
+    <div class="compare">
+      <div class="compare-box java">
+        <div class="compare-title">✗ 예전 Java (클래스 필요)</div>
+        <pre><span class="cm">// 리스트 출력하려고 클래스 만들기</span>
+<span class="kw">for</span> (<span class="tp">Transaction</span> tx : txList) {
+    System.out.<span class="fn">println</span>(tx);
+}</pre>
+      </div>
+      <div class="compare-box java">
+        <div class="compare-title">✓ 람다 (한 줄로 됨)</div>
+        <pre><span class="cm">// 람다로 간결하게</span>
+txList.<span class="fn">forEach</span>(tx -> System.out.<span class="fn">println</span>(tx));</pre>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <h4>핵심</h4>
+        <p><code>tx -></code> 이 부분이 람다식. "각 tx마다 뭘 할지"를 화살표 오른쪽에 써주면 됩니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>2. 람다 기본 문법</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">Java</span></div>
+      <pre><span class="cm">// 기본 형태</span>
+(파라미터) -> { 실행할 코드 }
+
+<span class="cm">// 예시 1: 리스트 출력</span>
+List&lt;<span class="tp">Integer</span>&gt; numbers = Arrays.<span class="fn">asList</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>);
+numbers.<span class="fn">forEach</span>(num -> System.out.<span class="fn">println</span>(num));
+
+<span class="cm">// 예시 2: 여러 줄일 때는 중괄호 사용</span>
+numbers.<span class="fn">forEach</span>(num -> {
+    <span class="kw">if</span> (num % <span class="num">2</span> == <span class="num">0</span>) {
+        System.out.<span class="fn">println</span>(<span class="str">"짝수: "</span> + num);
+    }
+});</pre>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <h4>변수명은 내가 정해!</h4>
+        <p><code>num</code>, <code>item</code>, <code>tx</code>, <code>x</code> 뭐든 상관없어요. <code>for (int num : numbers)</code>에서 <code>num</code> 정하는 것과 똑같습니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>3. 람다 응용: forEach 말고 더 뭐가 있어?</h3>
+
+    <h4>① filter - 조건 필터링</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">Java</span></div>
+      <pre><span class="cm">// 5만원 이상 거래만 추출</span>
+List&lt;<span class="tp">Transaction</span>&gt; highAmount = txList.<span class="fn">stream</span>()
+    .<span class="fn">filter</span>(tx -> tx.<span class="fn">getAmount</span>() >= <span class="num">50000</span>)
+    .<span class="fn">collect</span>(Collectors.<span class="fn">toList</span>());</pre>
+    </div>
+
+    <h4>② map - 특정 값만 추출</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">Java</span></div>
+      <pre><span class="cm">// 거래 ID만 리스트로 추출</span>
+List&lt;<span class="tp">String</span>&gt; ids = txList.<span class="fn">stream</span>()
+    .<span class="fn">map</span>(tx -> tx.<span class="fn">getId</span>())
+    .<span class="fn">collect</span>(Collectors.<span class="fn">toList</span>());</pre>
+    </div>
+
+    <h4>③ sort - 정렬</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">Java</span></div>
+      <pre><span class="cm">// 금액 기준 내림차순</span>
+txList.<span class="fn">sort</span>((tx1, tx2) -> tx2.<span class="fn">getAmount</span>() - tx1.<span class="fn">getAmount</span>());</pre>
+    </div>
+
+    <h4>④ 실무 조합 예시</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">Java - 실무 스타일</span></div>
+      <pre><span class="cm">// 연체 중인 채무의 총액 계산</span>
+<span class="kw">int</span> totalOverdue = debtList.<span class="fn">stream</span>()
+    .<span class="fn">filter</span>(debt -> debt.<span class="fn">isOverdue</span>())      <span class="cm">// 연체 중만</span>
+    .<span class="fn">map</span>(debt -> debt.<span class="fn">getAmount</span>())         <span class="cm">// 금액만 추출</span>
+    .<span class="fn">reduce</span>(<span class="num">0</span>, (sum, amt) -> sum + amt);   <span class="cm">// 합계</span></pre>
+    </div>
+
+    <table>
+      <tr><th>메서드</th><th>stream 필요?</th><th>용도</th></tr>
+      <tr><td><code>forEach</code></td><td><span class="badge red">불필요</span></td><td>각 항목마다 실행</td></tr>
+      <tr><td><code>sort</code></td><td><span class="badge red">불필요</span></td><td>정렬</td></tr>
+      <tr><td><code>filter</code></td><td><span class="badge green">필요</span></td><td>조건 필터링</td></tr>
+      <tr><td><code>map</code></td><td><span class="badge green">필요</span></td><td>값 변환/추출</td></tr>
+      <tr><td><code>reduce</code></td><td><span class="badge green">필요</span></td><td>합계/누적</td></tr>
+      <tr><td><code>anyMatch</code></td><td><span class="badge green">필요</span></td><td>조건 만족 확인</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h3>4. 왜 람다가 유용해? (메서드를 파라미터로 넘기기)</h3>
+    <p>람다의 진짜 목적은 <strong>"처리 로직을 나중에 결정"</strong>하기 위해서입니다.</p>
+
+    <h4>예전 문제점</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">Java</span></div>
+      <pre><span class="cm">// 간단한 로직 하나 쓰려고 클래스 3개 만들기</span>
+<span class="kw">class</span> <span class="tp">PrintProcessor</span> <span class="kw">implements</span> <span class="tp">Processor</span> {
+    <span class="kw">public void</span> <span class="fn">process</span>(<span class="tp">Transaction</span> tx) {
+        System.out.<span class="fn">println</span>(tx);
+    }
+}
+<span class="kw">class</span> <span class="tp">LogProcessor</span> <span class="kw">implements</span> <span class="tp">Processor</span> { ... }
+<span class="kw">class</span> <span class="tp">EmailProcessor</span> <span class="kw">implements</span> <span class="tp">Processor</span> { ... }
+
+<span class="fn">processAll</span>(<span class="kw">new</span> <span class="fn">PrintProcessor</span>());
+<span class="fn">processAll</span>(<span class="kw">new</span> <span class="fn">LogProcessor</span>());
+<span class="fn">processAll</span>(<span class="kw">new</span> <span class="fn">EmailProcessor</span>());</pre>
+    </div>
+
+    <h4>람다로 해결</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">Java</span></div>
+      <pre><span class="cm">// 클래스 없이 "로직만" 전달</span>
+<span class="fn">processAll</span>(tx -> System.out.<span class="fn">println</span>(tx));
+<span class="fn">processAll</span>(tx -> log.<span class="fn">save</span>(tx.<span class="fn">getId</span>()));
+<span class="fn">processAll</span>(tx -> email.<span class="fn">send</span>(tx.<span class="fn">getAmount</span>()));
+
+<span class="cm">// processAll 메서드 정의</span>
+<span class="kw">public void</span> <span class="fn">processAll</span>(Consumer&lt;<span class="tp">Transaction</span>&gt; processor) {
+    <span class="kw">for</span> (<span class="tp">Transaction</span> tx : txList) {
+        processor.<span class="fn">accept</span>(tx);  <span class="cm">// 받은 로직 실행</span>
+    }
+}</pre>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-icon">✅</div>
+      <div class="callout-body">
+        <h4>"메서드를 파라미터로 넘긴다" = 처리 방식을 나중에 결정</h4>
+        <p><code>processAll</code>은 "리스트 순회"만 하고, <strong>"어떻게 처리할지"는 호출하는 쪽이 람다로 전달</strong>합니다.<br>
+        이게 바로 콜백(Callback) 패턴이에요.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>5. 람다 ≠ 스트림 (완전히 다른 개념!)</h3>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <h4>헷갈리기 쉬운 부분</h4>
+        <p><strong>람다 = 화살표 문법</strong> (<code>x -> x * 2</code>)<br>
+        <strong>스트림 = 데이터 처리 파이프라인</strong> (<code>.stream().filter().map()</code>)<br>
+        둘은 자주 같이 쓰이지만 <strong>별개의 개념</strong>입니다!</p>
+      </div>
+    </div>
+
+    <div class="compare">
+      <div class="compare-box java">
+        <div class="compare-title">람다만 (스트림 없이)</div>
+        <pre><span class="cm">// forEach에 람다만 사용</span>
+list.<span class="fn">forEach</span>(item -> System.out.<span class="fn">println</span>(item));
+
+<span class="cm">// 버튼 클릭 (콜백)</span>
+button.<span class="fn">onClick</span>(() -> System.out.<span class="fn">println</span>(<span class="str">"클릭"</span>));
+
+<span class="cm">// 스레드 실행</span>
+executor.<span class="fn">submit</span>(() -> <span class="fn">doWork</span>());</pre>
+      </div>
+      <div class="compare-box java">
+        <div class="compare-title">스트림 + 람다</div>
+        <pre><span class="cm">// 스트림에서 람다 사용</span>
+list.<span class="fn">stream</span>()
+    .<span class="fn">filter</span>(x -> x > <span class="num">10</span>)  <span class="cm">// 람다</span>
+    .<span class="fn">map</span>(x -> x * <span class="num">2</span>)      <span class="cm">// 람다</span>
+    .<span class="fn">collect</span>(Collectors.<span class="fn">toList</span>());</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>6. 스트림이 for문보다 확실히 좋은 경우</h3>
+
+    <h4>① 병렬 처리 (멀티코어 활용)</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">Java</span></div>
+      <pre><span class="cm">// for문 - 순차 처리 (느림)</span>
+<span class="kw">for</span> (<span class="tp">Transaction</span> tx : txList) {  <span class="cm">// 10초</span>
+    <span class="fn">heavyCalculation</span>(tx);  <span class="cm">// CPU 집약적</span>
+}
+
+<span class="cm">// 스트림 - 병렬 처리 (빠름)</span>
+txList.<span class="fn">parallelStream</span>()  <span class="cm">// 3초로 단축!</span>
+    .<span class="fn">forEach</span>(tx -> <span class="fn">heavyCalculation</span>(tx));</pre>
+    </div>
+
+    <h4>② 데이터 그룹화/집계</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">Java</span></div>
+      <pre><span class="cm">// for문 - 복잡함</span>
+<span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">List</span>&lt;<span class="tp">Transaction</span>&gt;&gt; grouped = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+<span class="kw">for</span> (<span class="tp">Transaction</span> tx : txList) {
+    grouped.<span class="fn">computeIfAbsent</span>(tx.<span class="fn">getStatus</span>(), k -> <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;()).<span class="fn">add</span>(tx);
+}
+
+<span class="cm">// 스트림 - 깔끔</span>
+<span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">List</span>&lt;<span class="tp">Transaction</span>&gt;&gt; grouped = txList.<span class="fn">stream</span>()
+    .<span class="fn">collect</span>(Collectors.<span class="fn">groupingBy</span>(Transaction::getStatus));</pre>
+    </div>
+
+    <h4>③ 함수형 체이닝 (가독성)</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">Java</span></div>
+      <pre><span class="cm">// for문 - 단계별로 나눠야 함</span>
+<span class="tp">List</span>&lt;<span class="tp">Transaction</span>&gt; filtered = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+<span class="kw">for</span> (<span class="tp">Transaction</span> tx : txList) {
+    <span class="kw">if</span> (tx.<span class="fn">getAmount</span>() > <span class="num">50000</span>) filtered.<span class="fn">add</span>(tx);
+}
+<span class="tp">List</span>&lt;<span class="tp">String</span>&gt; ids = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+<span class="kw">for</span> (<span class="tp">Transaction</span> tx : filtered) { ids.<span class="fn">add</span>(tx.<span class="fn">getId</span>()); }
+
+<span class="cm">// 스트림 - 하나의 흐름</span>
+<span class="tp">List</span>&lt;<span class="tp">String</span>&gt; ids = txList.<span class="fn">stream</span>()
+    .<span class="fn">filter</span>(tx -> tx.<span class="fn">getAmount</span>() > <span class="num">50000</span>)
+    .<span class="fn">map</span>(Transaction::getId)
+    .<span class="fn">sorted</span>()
+    .<span class="fn">collect</span>(Collectors.<span class="fn">toList</span>());</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>7. for문이 스트림보다 좋은 경우</h3>
+
+    <h4>성능 비교 (실측!)</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">Java - 성능 테스트</span></div>
+      <pre><span class="cm">// for문 방식</span>
+<span class="kw">for</span> (<span class="tp">Account</span> acc : accountList) {  <span class="cm">// 1번 순회</span>
+    <span class="kw">if</span> (acc.<span class="fn">getOverdueDays</span>() <= <span class="num">0</span>) <span class="kw">continue</span>;
+    externalApi.<span class="fn">sendSMS</span>(acc);
+    mapper.<span class="fn">update</span>(acc);
+}
+
+<span class="cm">// 스트림 방식</span>
+accountList.<span class="fn">stream</span>()  <span class="cm">// 1번 순회 + 오버헤드</span>
+    .<span class="fn">filter</span>(acc -> acc.<span class="fn">getOverdueDays</span>() > <span class="num">0</span>)
+    .<span class="fn">forEach</span>(acc -> {
+        externalApi.<span class="fn">sendSMS</span>(acc);
+        mapper.<span class="fn">update</span>(acc);
+    });</pre>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <h4>성능 진실</h4>
+        <p><strong>for문이 조금 더 빠릅니다!</strong> 스트림은 내부적으로 오버헤드가 있어요.<br>
+        하지만 차이는 미미하고 (밀리초 단위), <strong>가독성이 훨씬 중요</strong>합니다.<br>
+        단, API/DB 작업처럼 무거운 작업에서는 for문이 디버깅하기 더 쉬워요.</p>
+      </div>
+    </div>
+
+    <table>
+      <tr><th>상황</th><th>for문</th><th>스트림</th><th>이유</th></tr>
+      <tr><td>CPU 집약 계산 (병렬)</td><td><span class="badge red">느림</span></td><td><span class="badge green">빠름</span></td><td>parallelStream</td></tr>
+      <tr><td>API/DB 호출</td><td><span class="badge green">좋음</span></td><td><span class="badge red">나쁨</span></td><td>디버깅, 예외처리</td></tr>
+      <tr><td>단순 변환/필터</td><td><span class="badge blue">OK</span></td><td><span class="badge green">좋음</span></td><td>가독성</td></tr>
+      <tr><td>복잡한 로직 (50줄+)</td><td><span class="badge green">좋음</span></td><td><span class="badge red">나쁨</span></td><td>유지보수</td></tr>
+      <tr><td>그룹화/집계</td><td><span class="badge red">복잡</span></td><td><span class="badge green">간단</span></td><td>스트림 API</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h3>8. 실무 판단 기준 (균형 잡힌 접근)</h3>
+
+    <div class="compare">
+      <div class="compare-box java">
+        <div class="compare-title">for문 선택</div>
+        <pre><span class="cm">// ✓ API/DB 작업</span>
+<span class="kw">for</span> (<span class="tp">Tx</span> tx : txList) {
+    <span class="tp">Acc</span> acc = api.<span class="fn">get</span>(tx.<span class="fn">getId</span>());
+    mapper.<span class="fn">update</span>(acc);
+}
+
+<span class="cm">// ✓ 복잡한 로직</span>
+<span class="kw">for</span> (<span class="tp">Tx</span> tx : txList) {
+    <span class="kw">if</span> (...) { ... }
+    <span class="kw">else if</span> (...) { ... }
+    <span class="cm">// 50줄...</span>
+}</pre>
+      </div>
+      <div class="compare-box java">
+        <div class="compare-title">스트림 선택</div>
+        <pre><span class="cm">// ✓ 병렬 계산</span>
+data.<span class="fn">parallelStream</span>()
+    .<span class="fn">map</span>(heavy::calc)
+    .<span class="fn">collect</span>(toList());
+
+<span class="cm">// ✓ 단순 변환</span>
+ids = list.<span class="fn">stream</span>()
+    .<span class="fn">map</span>(User::getId)
+    .<span class="fn">collect</span>(toList());</pre>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <h4>억지로 스트림 쓰지 마세요!</h4>
+        <p>for문 안에 복잡한 로직 50줄 → 스트림으로 바꾸면 오히려 가독성 나빠집니다.<br>
+        <strong>"무조건 for문" ✗ / "무조건 스트림" ✗ / "상황 봐서 선택" ✓</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>9. Java 람다 → JavaScript 화살표 함수</h3>
+    <p>JavaScript의 화살표 함수(<code>=></code>)는 Java 람다와 개념이 <strong>완전히 똑같습니다</strong>.</p>
+
+    <div class="compare">
+      <div class="compare-box java">
+        <div class="compare-title">Java 람다</div>
+        <pre><span class="cm">// 리스트 출력</span>
+list.<span class="fn">forEach</span>(item ->
+    System.out.<span class="fn">println</span>(item)
+);
+
+<span class="cm">// 필터링</span>
+list.<span class="fn">stream</span>()
+    .<span class="fn">filter</span>(x -> x > <span class="num">10</span>)
+    .<span class="fn">collect</span>(Collectors.<span class="fn">toList</span>());</pre>
+      </div>
+      <div class="compare-box js">
+        <div class="compare-title">JavaScript 화살표 함수</div>
+        <pre><span class="cm">// 리스트 출력</span>
+list.<span class="fn">forEach</span>(item =>
+    console.<span class="fn">log</span>(item)
+);
+
+<span class="cm">// 필터링 (stream() 없이 바로!)</span>
+list.<span class="fn">filter</span>(x => x > <span class="num">10</span>);</pre>
+      </div>
+    </div>
+
+    <h4>React 실제 예시</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">JavaScript/React</span></div>
+      <pre><span class="cm">// 버튼 클릭 (콜백)</span>
+&lt;button onClick={() => console.<span class="fn">log</span>(<span class="str">'클릭!'</span>)}&gt;
+    삭제
+&lt;/button&gt;
+
+<span class="cm">// 리스트 렌더링</span>
+<span class="kw">function</span> <span class="fn">TransactionList</span>({ txList }) {
+    <span class="kw">return</span> (
+        &lt;div&gt;
+            {txList.<span class="fn">map</span>(tx => (
+                &lt;div key={tx.id}&gt;
+                    {tx.desc}: {tx.amount}원
+                &lt;/div&gt;
+            ))}
+        &lt;/div&gt;
+    );
+}</pre>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-icon">🎯</div>
+      <div class="callout-body">
+        <h4>Java 람다 이해했으면 React도 됨!</h4>
+        <p>문법만 조금 다르고(<code>-></code> vs <code>=></code>), 개념은 완전히 똑같습니다.<br>
+        "메서드를 변수처럼 넘긴다"는 게 핵심이에요.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>10. 지금 내 코드에서 이미 쓰고 있는 람다</h3>
+    <p>실무 Java 코드에서 이미 람다를 <strong>적극 활용</strong>하고 있어요!</p>
+
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">Java - 실무 코드 예시</span></div>
+      <pre><span class="cm">// 멀티스레드로 계산 작업 실행</span>
+executor.<span class="fn">submit</span>(() -> {  <span class="cm">// ← 이게 람다!</span>
+    <span class="kw">try</span> {
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; finalInfoDataResVOList.<span class="fn">size</span>(); i++) {
+            <span class="cm">// 복잡한 계산 로직...</span>
+        }
+    } <span class="kw">catch</span> (<span class="tp">RuntimeException</span> e) {
+        alarmCntn.<span class="fn">append</span>(<span class="str">"계산 중 문제 발생"</span>);
+    }
+});
+
+<span class="cm">// CompletableFuture도 람다 사용</span>
+CompletableFuture.<span class="fn">runAsync</span>(() -> {  <span class="cm">// ← 이것도 람다!</span>
+    <span class="kw">boolean</span> result = mapper.<span class="fn">chngXcelList</span>(batchList);
+    <span class="kw">if</span> (result) {
+        resCnt.<span class="fn">getAndIncrement</span>();
+    }
+}, executor);</pre>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <h4>이미 쓰고 있었어!</h4>
+        <p><code>executor.submit(() -> { ... })</code>는 "이 작업을 나중에 스레드에서 실행해줘"라는 의미예요.<br>
+        <strong>"어떤 작업을 할지"를 람다로 전달</strong>한 거예요. 이게 바로 "메서드를 파라미터로 넘기기"!</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>11. 실무 적용 가이드</h3>
+
+    <h4>✓ 적용 가능: 전처리/집계</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">Java - 스트림 적용 예시</span></div>
+      <pre><span class="cm">// 재계산 대상 필터링</span>
+<span class="tp">List</span>&lt;<span class="tp">String</span>&gt; reCalcTargets = list.<span class="fn">stream</span>()
+    .<span class="fn">filter</span>(vo -> <span class="str">"Y"</span>.<span class="fn">equals</span>(vo.<span class="fn">getNeedReCalc</span>()))
+    .<span class="fn">map</span>(vo -> vo.<span class="fn">getLoanAcno</span>())
+    .<span class="fn">collect</span>(Collectors.<span class="fn">toList</span>());
+
+<span class="cm">// 상태별 통계</span>
+<span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">Long</span>&gt; stats = list.<span class="fn">stream</span>()
+    .<span class="fn">collect</span>(Collectors.<span class="fn">groupingBy</span>(
+        vo -> vo.<span class="fn">getProdMcls</span>(),
+        Collectors.<span class="fn">counting</span>()
+    ));</pre>
+    </div>
+
+    <h4>✗ 적용 불가: 메인 계산 로직</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">Java - for문 유지</span></div>
+      <pre><span class="cm">// 이건 for문이 맞아!</span>
+<span class="kw">for</span> (<span class="tp">InfoDataResVO</span> vo : finalInfoDataResVOList) {
+    <span class="cm">// 1. DB 조회</span>
+    <span class="tp">InfoDataResVO</span> prodInfo = mapper.<span class="fn">inqProdInfo</span>(vo);
+
+    <span class="cm">// 2. 복잡한 계산 로직 (50줄+)</span>
+    <span class="kw">if</span> (psrvPrgststate) {
+        <span class="kw">if</span> (<span class="str">"10"</span>.<span class="fn">equals</span>(prodMcls)) { calcAsqlClcd = <span class="str">"3"</span>; }
+    }
+
+    <span class="cm">// 3. DB 저장</span>
+    <span class="kw">try</span> {
+        <span class="kw">boolean</span> result = mapper.<span class="fn">regAcnoInfo</span>(vo);
+        resCnt.<span class="fn">incrementAndGet</span>();
+    } <span class="kw">catch</span> (<span class="tp">Exception</span> e) {
+        failLoanAcno.<span class="fn">append</span>(vo.<span class="fn">getLoanAcno</span>());
+    }
+}</pre>
+    </div>
+
+    <h4>추천 적용 전략</h4>
+    <table>
+      <tr><th>작업</th><th>추천</th><th>예시</th></tr>
+      <tr><td>간단한 데이터 가공</td><td><span class="badge green">스트림</span></td><td>날짜 필터링</td></tr>
+      <tr><td>리스트 필터링</td><td><span class="badge green">스트림</span></td><td>연체 계좌만</td></tr>
+      <tr><td>통계/집계</td><td><span class="badge green">스트림</span></td><td>상태별 건수</td></tr>
+      <tr><td>ID 리스트 추출</td><td><span class="badge green">스트림</span></td><td>loanAcno만</td></tr>
+      <tr><td>건전성 계산 로직</td><td><span class="badge red">for문</span></td><td>복잡한 분기</td></tr>
+      <tr><td>DB 저장 루프</td><td><span class="badge red">for문</span></td><td>예외처리 필요</td></tr>
+      <tr><td>복잡한 조건 분기</td><td><span class="badge red">for문</span></td><td>50줄+ 로직</td></tr>
+    </table>
+
+    <div class="callout good">
+      <div class="callout-icon">✅</div>
+      <div class="callout-body">
+        <h4>점진적 적용이 안전해요</h4>
+        <p><strong>1단계:</strong> 간단한 변환만 (ID 추출, 필터링)<br>
+        <strong>2단계:</strong> 통계/집계 추가 (groupingBy)<br>
+        <strong>3단계:</strong> 메인 로직은 for문 유지<br><br>
+        무리해서 전부 바꾸지 말고, <strong>명확히 이득이 있는 부분만</strong> 적용하세요!</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">✏️ 연습문제</div>
+    <h4>람다 vs for문 판단 연습</h4>
+    <ol>
+      <li>Java 코드에서 for문으로 단순 출력만 하는 부분 찾아서 <code>.forEach()</code>로 바꿔보기</li>
+      <li>연체 계좌만 추출하는 로직을 <code>.filter()</code>로 만들어보기</li>
+      <li>상태별 건수 집계를 <code>.groupingBy()</code>로 만들어보기</li>
+      <li>복잡한 계산 로직은 for문으로 유지 (억지로 바꾸지 않기!)</li>
+    </ol>
+    <div class="hint">💡 힌트: API/DB 작업, 복잡한 if/else는 for문 유지! 단순 변환/집계만 스트림 적용!</div>
+  </div>
+
+  <div class="callout warn" style="margin-top: 32px;">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body">
+      <h4>실무 핵심 정리</h4>
+      <p><strong>"무조건 람다" ✗ / "무조건 for문" ✗</strong><br>
+      <strong>상황 맞는 선택 ✓</strong><br><br>
+      ▸ 병렬처리, 집계, 단순변환 → 스트림<br>
+      ▸ API/DB, 복잡한로직, 디버깅 → for문<br>
+      ▸ 팀 컨벤션 &gt; 개인 취향</p>
+    </div>
+  </div>
+
+  <div class="callout good" style="margin-top: 32px;">
+    <div class="callout-icon">🏁</div>
+    <div class="callout-body">
+      <h4>람다 완전 정복 완료!</h4>
+      <p><strong>배운 내용:</strong><br>
+      1. 람다 기본 문법 (<code>item -> { ... }</code>)<br>
+      2. 응용 메서드 (<code>filter</code>, <code>map</code>, <code>sort</code>, <code>reduce</code>)<br>
+      3. 왜 람다가 유용한지 (메서드를 파라미터로 넘기기)<br>
+      4. 람다 ≠ 스트림 (완전히 다른 개념!)<br>
+      5. 스트림이 좋은 경우 vs for문이 좋은 경우<br>
+      6. Java 람다 → JavaScript 화살표 함수 연결<br>
+      7. 실무 적용 가이드 (균형잡힌 접근)<br><br>
+      <strong>핵심:</strong> "무조건 람다"도, "무조건 for문"도 아닌, <strong>상황에 맞는 선택</strong>이 중요해요!<br>
+      이제 React 코드도, 람다 프로젝트 코드도 자신 있게 읽을 수 있어요!</p>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== CHAPTER 2 ======================== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-phase">Phase 1 — JS 핵심</div>
+    <div class="chapter-num">Chapter 02</div>
+    <h2>배열 메서드<br>map · filter · reduce · find</h2>
+    <p class="chapter-desc">Java의 Stream API와 거의 같습니다. transactions 배열로 직접 배워봅니다.</p>
+    <div class="chapter-divider"></div>
+  </div>
+
+  <div class="section">
+    <h3>1. forEach — 단순 반복</h3>
+    <p>Java의 <code>for (Item item : list)</code>와 동일합니다.</p>
+    <div class="compare">
+      <div class="compare-box java">
+        <div class="compare-title">☕ Java Stream</div>
+        <pre><span class="kw">for</span> (Account a : ACCOUNTS) {
+  bal.put(a.key, <span class="num">0</span>);
+}</pre>
+      </div>
+      <div class="compare-box js">
+        <div class="compare-title">🟨 JavaScript</div>
+        <pre>ACCOUNTS.<span class="fn">forEach</span>(a => {
+  bal[a.key] = <span class="num">0</span>;
+});</pre>
+      </div>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label"><span>실제 소스 — accounts.js</span><span class="lang">JS</span></div>
+      <pre><span class="kw">function</span> <span class="fn">calcBalance</span>() {
+  <span class="kw">const</span> bal = {};
+  <span class="cm">// 모든 계좌의 초기값을 0으로 설정</span>
+  ACCOUNTS.<span class="fn">forEach</span>(a => bal[a.key] = INIT_BALANCE[a.key] || <span class="num">0</span>);
+
+  <span class="cm">// 거래내역을 순회하며 잔액 계산</span>
+  transactions.<span class="fn">forEach</span>(tx => {
+    <span class="kw">const</span> amt = tx.amount || <span class="num">0</span>;
+    <span class="kw">if</span> (tx.type === <span class="str">'입금'</span>) bal[tx.account] += amt;
+    <span class="kw">else</span>                   bal[tx.account] -= amt;
+  });
+  <span class="kw">return</span> bal;
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>2. filter — 조건에 맞는 것만 추출</h3>
+    <p>Java의 <code>.stream().filter()</code>와 동일. 원본 배열은 변경하지 않고 새 배열을 반환합니다.</p>
+    <div class="code-wrap">
+      <div class="code-label"><span>실제 소스 — render.js</span><span class="lang">JS</span></div>
+      <pre><span class="cm">// 기간 필터 — from 이후 날짜인 것만</span>
+<span class="kw">let</span> list = [...transactions];
+<span class="kw">if</span> (from) list = list.<span class="fn">filter</span>(t => t.date >= from);
+<span class="kw">if</span> (to)   list = list.<span class="fn">filter</span>(t => t.date <= to);
+
+<span class="cm">// 타입 필터 — "입금" 또는 "출금"만</span>
+<span class="kw">if</span> (typeFilter) list = list.<span class="fn">filter</span>(t => t.type === typeFilter);
+
+<span class="cm">// 계좌 필터 — 특정 계좌만</span>
+<span class="kw">if</span> (accountFilter) list = list.<span class="fn">filter</span>(t => t.account === accountFilter);</pre>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <h4>filter는 원본을 바꾸지 않는다</h4>
+        <p><code>list.filter(...)</code>는 새로운 배열을 반환합니다. 원본 <code>transactions</code>는 그대로 유지됩니다. 그래서 <code>list =</code>로 재할당해서 씁니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>3. map — 배열의 모든 요소를 변환</h3>
+    <p>Java의 <code>.stream().map()</code>과 동일. 각 요소를 변환해서 새 배열을 만듭니다.</p>
+    <div class="code-wrap">
+      <div class="code-label"><span>실제 소스 — render.js</span><span class="lang">JS</span></div>
+      <pre><span class="cm">// 각 계좌(Account 객체)를 HTML 문자열로 변환</span>
+<span class="kw">const</span> html = ACCOUNTS.<span class="fn">map</span>(a => {
+  <span class="kw">const</span> v = bal[a.key] || <span class="num">0</span>;
+  <span class="kw">return</span> <span class="str">`
+    &lt;div class="acc-card"&gt;
+      &lt;div class="acc-name"&gt;</span>${<span class="fn">esc</span>(a.label)}<span class="str">&lt;/div&gt;
+    &lt;/div&gt;`</span>;
+}).<span class="fn">join</span>(<span class="str">''</span>);  <span class="cm">// 배열 → 하나의 문자열</span>
+
+document.<span class="fn">getElementById</span>(<span class="str">'accountCards'</span>).innerHTML = html;</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>4. reduce — 배열을 하나의 값으로 축약</h3>
+    <p>Java의 <code>.stream().reduce()</code>와 동일. 합계 계산에 자주 씁니다.</p>
+    <div class="code-wrap">
+      <div class="code-label"><span>실제 소스 — report.js</span><span class="lang">JS</span></div>
+      <pre><span class="cm">// 원화 계좌들의 입금 합계</span>
+<span class="kw">const</span> totIn = ACCOUNTS
+  .<span class="fn">filter</span>(a => a.type !== <span class="str">'usd'</span>)       <span class="cm">// USD 제외</span>
+  .<span class="fn">reduce</span>((sum, a) => sum + (sumIn[a.key] || <span class="num">0</span>), <span class="num">0</span>);
+<span class="cm">//         ↑누적값    ↑현재요소              ↑초기값</span>
+
+<span class="cm">// 읽는 법: sum을 0에서 시작해서 각 a마다 sumIn[a.key]를 더해나감</span></pre>
+    </div>
+
+    <table>
+      <tr><th>메서드</th><th>용도</th><th>반환값</th></tr>
+      <tr><td><code>forEach</code></td><td>단순 반복, 부수효과</td><td>없음 (undefined)</td></tr>
+      <tr><td><code>filter</code></td><td>조건에 맞는 것만 추출</td><td>새 배열</td></tr>
+      <tr><td><code>map</code></td><td>각 요소를 변환</td><td>새 배열 (길이 동일)</td></tr>
+      <tr><td><code>reduce</code></td><td>하나의 값으로 축약</td><td>단일 값</td></tr>
+      <tr><td><code>find</code></td><td>조건에 맞는 첫 번째 요소</td><td>요소 또는 undefined</td></tr>
+      <tr><td><code>findIndex</code></td><td>조건에 맞는 첫 번째 인덱스</td><td>인덱스 또는 -1</td></tr>
+      <tr><td><code>sort</code></td><td>정렬</td><td>원본 배열 (주의!)</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h3>5. find / findIndex — 요소 탐색</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span>실제 소스 — accounts.js, transactions.js</span><span class="lang">JS</span></div>
+      <pre><span class="cm">// find: 조건에 맞는 첫 번째 계좌 객체 반환</span>
+<span class="kw">const</span> acc = ACCOUNTS.<span class="fn">find</span>(a => a.key === <span class="str">'account_1'</span>);
+<span class="cm">// → { key: 'account_1', label: '기업은행', ... } 또는 undefined</span>
+
+<span class="cm">// findIndex: UUID로 거래내역 위치 찾기 (Chapter 2에서 배운 UUID 삭제)</span>
+<span class="kw">const</span> idx = transactions.<span class="fn">findIndex</span>(t => t.id === id);
+<span class="kw">if</span> (idx !== -<span class="num">1</span>) transactions.<span class="fn">splice</span>(idx, <span class="num">1</span>);</pre>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">✏️ 연습문제</div>
+    <h4>Chapter 02 확인 문제</h4>
+    <ol>
+      <li><code>transactions</code> 배열에서 "출금"인 거래만 모아서 새 배열을 만드는 코드를 작성해보세요.</li>
+      <li><code>transactions</code> 배열에서 금액의 합계를 구하는 코드를 <code>reduce</code>로 작성해보세요.</li>
+      <li><code>map</code>과 <code>forEach</code>의 차이는 무엇인가요?</li>
+    </ol>
+    <div class="hint">💡 힌트: filter는 새 배열을 반환, reduce는 누적값(초기값)을 두 번째 인자로 받습니다.</div>
+  </div>
+</div>
+
+<!-- ======================== CHAPTER 3 ======================== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-phase">Phase 1 — JS 핵심</div>
+    <div class="chapter-num">Chapter 03</div>
+    <h2>비동기<br>Promise · async/await</h2>
+    <p class="chapter-desc">JS가 Java와 가장 다른 부분입니다. 파일 저장/로드 코드로 원리를 이해합니다.</p>
+    <div class="chapter-divider"></div>
+  </div>
+
+  <div class="section">
+    <h3>1. 왜 비동기가 필요한가?</h3>
+    <p>JS는 기본적으로 <strong>싱글 스레드</strong>입니다. 파일 읽기·네트워크 요청처럼 시간이 걸리는 작업이 끝날 때까지 기다리면 화면이 멈춥니다.</p>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <h4>Java vs JS 스레드 차이</h4>
+        <p>Java: 멀티 스레드 → 별도 스레드에서 파일 I/O 처리<br>
+        JS: 싱글 스레드 → 비동기 콜백·Promise로 I/O 처리</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>2. Promise — 미래의 결과를 담는 그릇</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span>Promise 기본 구조</span><span class="lang">JS</span></div>
+      <pre><span class="cm">// Promise: "나중에 결과를 줄게"라는 약속 객체</span>
+<span class="kw">const</span> promise = <span class="kw">new</span> <span class="fn">Promise</span>((resolve, reject) => {
+  <span class="cm">// 성공하면 resolve 호출</span>
+  <span class="fn">resolve</span>(<span class="str">"데이터"</span>);
+  <span class="cm">// 실패하면 reject 호출</span>
+  <span class="fn">reject</span>(<span class="kw">new</span> <span class="fn">Error</span>(<span class="str">"실패"</span>));
+});
+
+<span class="cm">// .then()으로 결과 받기, .catch()로 에러 처리</span>
+promise
+  .<span class="fn">then</span>(data => console.<span class="fn">log</span>(data))
+  .<span class="fn">catch</span>(err => console.<span class="fn">error</span>(err));</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>3. async/await — Promise를 동기처럼 읽기</h3>
+    <p><code>.then().catch()</code> 체인 대신 마치 Java처럼 위에서 아래로 읽히게 만듭니다.</p>
+
+    <div class="code-wrap">
+      <div class="code-label"><span>실제 소스 — data.js</span><span class="lang">JS</span></div>
+      <pre><span class="cm">// async 함수: 내부에서 await 사용 가능</span>
+<span class="kw">async function</span> <span class="fn">loadData</span>() {
+  <span class="kw">if</span> (isElectron) {
+    <span class="cm">// await: 결과가 올 때까지 여기서 기다림</span>
+    <span class="kw">const</span> res = <span class="kw">await</span> window.electronAPI.<span class="fn">loadTransactions</span>();
+    <span class="cm">//            ↑ 이 줄이 끝나야 다음 줄 실행</span>
+    transactions = res.ok ? (res.data || []) : [];
+  }
+}
+
+<span class="cm">// 호출할 때도 await 필요</span>
+<span class="kw">await</span> <span class="fn">loadInitBalance</span>();
+<span class="kw">await</span> <span class="fn">loadData</span>();          <span class="cm">// loadData가 끝나야 아래 실행</span>
+<span class="fn">renderAll</span>();               <span class="cm">// 데이터 로드 완료 후 렌더링</span></pre>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-icon">✅</div>
+      <div class="callout-body">
+        <h4>async/await 규칙</h4>
+        <p>① <code>await</code>는 반드시 <code>async</code> 함수 안에서만 사용<br>
+        ② <code>async</code> 함수는 항상 Promise를 반환<br>
+        ③ 에러 처리는 <code>try { } catch(e) { }</code> 사용</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>4. try/catch — 비동기 에러 처리</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span>실제 소스 — bank-import.js</span><span class="lang">JS</span></div>
+      <pre><span class="kw">async function</span> <span class="fn">importBankFile</span>(e) {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> buf = <span class="kw">await</span> file.<span class="fn">arrayBuffer</span>();  <span class="cm">// 파일 읽기</span>
+    <span class="kw">const</span> parsed = <span class="fn">parseRows</span>(rawRows, schema);
+
+    <span class="kw">if</span> (!parsed.length) {
+      <span class="fn">showToast</span>(<span class="str">'인식 실패'</span>, <span class="str">'error'</span>);
+      <span class="kw">return</span>;
+    }
+  } <span class="kw">catch</span>(err) {
+    <span class="cm">// 파일 읽기 실패 시 여기로 옴</span>
+    <span class="fn">showToast</span>(<span class="str">'파일을 읽을 수 없습니다: '</span> + err.message, <span class="str">'error'</span>);
+  }
+}</pre>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">✏️ 연습문제</div>
+    <h4>Chapter 03 확인 문제</h4>
+    <ol>
+      <li><code>async/await</code>를 사용하지 않고 <code>.then()</code>으로 <code>loadData()</code>를 호출하는 코드를 작성해보세요.</li>
+      <li>아래 코드에서 무엇이 잘못됐나요?</li>
+    </ol>
+    <div class="code-wrap" style="margin-top:12px;">
+      <pre><span class="kw">function</span> <span class="fn">fetchData</span>() {           <span class="cm">// ← 문제가 있습니다</span>
+  <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">loadData</span>();
+  <span class="kw">return</span> res;
+}</pre>
+    </div>
+    <div class="hint">💡 힌트: await는 async 함수 안에서만 사용 가능합니다.</div>
+  </div>
+</div>
+
+<!-- ======================== CHAPTER 4 ======================== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-phase">Phase 1 — JS 핵심</div>
+    <div class="chapter-num">Chapter 04</div>
+    <h2>모던 JS 문법<br>구조분해 · 스프레드 · 옵셔널체이닝</h2>
+    <p class="chapter-desc">소스 전반에 등장하는 현대 JS 문법. 처음엔 낯설지만 익숙해지면 코드가 훨씬 간결해집니다.</p>
+    <div class="chapter-divider"></div>
+  </div>
+
+  <div class="section">
+    <h3>1. 구조 분해 할당 (Destructuring)</h3>
+    <p>객체나 배열에서 원하는 값만 꺼내는 문법입니다.</p>
+    <div class="code-wrap">
+      <div class="code-label"><span>객체 구조 분해</span><span class="lang">JS</span></div>
+      <pre><span class="cm">// 긴 방식</span>
+<span class="kw">const</span> label  = account.label;
+<span class="kw">const</span> num    = account.num;
+<span class="kw">const</span> type   = account.type;
+
+<span class="cm">// 구조 분해 — 한 줄로</span>
+<span class="kw">const</span> { label, num, type } = account;
+
+<span class="cm">// 실제 소스 — data.js: 저장 파일에서 특정 키를 분리</span>
+<span class="kw">function</span> <span class="fn">applyLoaded</span>({ _accountConfig, _approvalNames, ...balanceData }) {
+<span class="cm">//                      ↑분리              ↑분리          ↑나머지</span>
+  INIT_BALANCE = { ...balanceData };
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>2. 스프레드 연산자 (...)</h3>
+    <p>배열이나 객체를 펼쳐서 복사하거나 합칩니다.</p>
+    <div class="code-wrap">
+      <div class="code-label"><span>실제 소스 전반</span><span class="lang">JS</span></div>
+      <pre><span class="cm">// 객체 복사 (Java의 clone과 비슷, 얕은 복사)</span>
+<span class="kw">const</span> newBalance = { ...INIT_BALANCE };
+
+<span class="cm">// 객체 합치기</span>
+<span class="kw">const</span> data = { ...INIT_BALANCE, _accountConfig: getAccountConfig() };
+
+<span class="cm">// 배열 복사 (원본 보존)</span>
+<span class="kw">let</span> list = [...transactions];
+
+<span class="cm">// 배열 합치기</span>
+transactions = [...transactions, ...newItems];</pre>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <h4>왜 복사하나?</h4>
+        <p><code>const list = transactions</code>는 같은 배열을 가리킵니다. <code>list</code>를 바꾸면 <code>transactions</code>도 바뀝니다.<br>
+        <code>const list = [...transactions]</code>은 새 배열을 만들어서 원본을 보호합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>3. 옵셔널 체이닝 (?.) 과 Nullish 병합 (??)</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span>실제 소스 — accounts.js</span><span class="lang">JS</span></div>
+      <pre><span class="cm">// ?. : 중간 값이 null/undefined이면 에러 대신 undefined 반환</span>
+<span class="kw">const</span> label = ACCOUNTS.<span class="fn">find</span>(a => a.key === key)?.<span class="fn">label</span>;
+<span class="cm">//                                              ↑ find가 undefined면 .label 접근 안 함</span>
+
+<span class="cm">// ?? : 왼쪽이 null/undefined일 때만 오른쪽 값 사용</span>
+<span class="kw">const</span> val = getVal(<span class="str">'f-amount'</span>) ?? <span class="str">''</span>;
+<span class="cm">//                               ↑ null/undefined이면 빈 문자열</span>
+
+<span class="cm">// || 와의 차이: ||는 falsy(0, '', false)도 오른쪽으로 넘어감</span>
+<span class="kw">const</span> a = <span class="num">0</span> || <span class="num">10</span>;   <span class="cm">// → 10  (0은 falsy)</span>
+<span class="kw">const</span> b = <span class="num">0</span> ?? <span class="num">10</span>;   <span class="cm">// → 0   (0은 null/undefined가 아님)</span></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>4. 템플릿 리터럴 (Template Literal)</h3>
+    <p>백틱(`)으로 감싸고 <code>${변수}</code>로 값을 삽입합니다. Java의 <code>String.format()</code>보다 훨씬 편합니다.</p>
+    <div class="compare">
+      <div class="compare-box java">
+        <div class="compare-title">☕ Java</div>
+        <pre><span class="tp">String</span> msg = <span class="tp">String</span>.<span class="fn">format</span>(
+  <span class="str">"계좌: %s, 잔액: %d"</span>,
+  label, amount
+);</pre>
+      </div>
+      <div class="compare-box js">
+        <div class="compare-title">🟨 JavaScript</div>
+        <pre><span class="kw">const</span> msg =
+  <span class="str">`계좌: </span>${label}<span class="str">, 잔액: </span>${amount}<span class="str">`</span>;
+
+<span class="cm">// 여러 줄도 그대로</span>
+<span class="kw">const</span> html = <span class="str">`
+  &lt;div&gt;</span>${label}<span class="str">&lt;/div&gt;
+`</span>;</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== CHAPTER 5 ======================== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-phase">Phase 1 — JS 핵심</div>
+    <div class="chapter-num">Chapter 05</div>
+    <h2>DOM 조작<br>이벤트 · innerHTML · querySelector</h2>
+    <p class="chapter-desc">브라우저 화면을 JS로 제어하는 방법. React를 이해하는 기초가 됩니다.</p>
+    <div class="chapter-divider"></div>
+  </div>
+
+  <div class="section">
+    <h3>1. 요소 가져오기</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span>DOM 요소 선택</span><span class="lang">JS</span></div>
+      <pre><span class="cm">// ID로 하나 가져오기 (가장 빠름)</span>
+<span class="kw">const</span> el = document.<span class="fn">getElementById</span>(<span class="str">'accountCards'</span>);
+
+<span class="cm">// CSS 선택자로 하나 가져오기</span>
+<span class="kw">const</span> btn = document.<span class="fn">querySelector</span>(<span class="str">'.tab-btn.active'</span>);
+
+<span class="cm">// CSS 선택자로 여러 개 가져오기 (NodeList)</span>
+<span class="kw">const</span> all = document.<span class="fn">querySelectorAll</span>(<span class="str">'.page'</span>);</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>2. 내용 바꾸기</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span>실제 소스 — render.js</span><span class="lang">JS</span></div>
+      <pre><span class="cm">// innerHTML: HTML 태그 포함해서 삽입 (XSS 주의)</span>
+document.<span class="fn">getElementById</span>(<span class="str">'accountCards'</span>).innerHTML = html;
+
+<span class="cm">// textContent: 텍스트만 (XSS 안전)</span>
+document.<span class="fn">getElementById</span>(<span class="str">'totalFund'</span>).textContent =
+  <span class="str">'₩ '</span> + total.<span class="fn">toLocaleString</span>(<span class="str">'ko-KR'</span>);</pre>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <h4>innerHTML vs textContent</h4>
+        <p>사용자 입력을 <code>innerHTML</code>에 바로 넣으면 XSS 공격에 취약합니다.<br>
+        그래서 소스에 <code>esc()</code> 함수로 HTML 특수문자를 이스케이프한 뒤 삽입합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>3. 이벤트 처리</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span>이벤트 처리 방식</span><span class="lang">JS</span></div>
+      <pre><span class="cm">// 방법 ① HTML 인라인 (소스에서 사용 중)</span>
+<span class="cm">// &lt;button onclick="addTransaction()"&gt;저장&lt;/button&gt;</span>
+
+<span class="cm">// 방법 ② addEventListener (더 권장되는 방식)</span>
+<span class="kw">const</span> btn = document.<span class="fn">getElementById</span>(<span class="str">'save-btn'</span>);
+btn.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () => {
+  <span class="fn">addTransaction</span>();
+});
+
+<span class="cm">// 방법 ③ 여러 요소에 한번에 이벤트 등록</span>
+document.<span class="fn">querySelectorAll</span>(<span class="str">'.tab-btn'</span>).<span class="fn">forEach</span>(btn => {
+  btn.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () => {
+    <span class="fn">switchTab</span>(btn.dataset.tab);
+  });
+});</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>4. classList — CSS 클래스 제어</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span>실제 소스 — app.js</span><span class="lang">JS</span></div>
+      <pre><span class="kw">function</span> <span class="fn">switchTab</span>(name) {
+  <span class="cm">// 모든 페이지에서 'active' 클래스 제거</span>
+  document.<span class="fn">querySelectorAll</span>(<span class="str">'.page'</span>)
+    .<span class="fn">forEach</span>(p => p.classList.<span class="fn">remove</span>(<span class="str">'active'</span>));
+
+  <span class="cm">// 선택된 페이지에 'active' 클래스 추가</span>
+  document.<span class="fn">getElementById</span>(<span class="str">'page-'</span> + name)
+    .classList.<span class="fn">add</span>(<span class="str">'active'</span>);
+}</pre>
+    </div>
+  </div>
+
+  <div class="callout good">
+    <div class="callout-icon">🎯</div>
+    <div class="callout-body">
+      <h4>Phase 1 완료! — React로 가기 전 핵심 포인트</h4>
+      <p>DOM을 직접 조작하는 코드(<code>getElementById</code>, <code>innerHTML</code>)가 많아지면 관리가 어려워집니다.<br>
+      이게 바로 React가 나온 이유입니다. Phase 2에서 이 Vanilla JS 코드를 React로 바꾸면서 비교해 봅니다.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== CHAPTER 6 Preview ======================== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-phase">Phase 2 — React 제대로</div>
+    <div class="chapter-num">Chapter 06</div>
+    <h2>왜 React인가<br>Vanilla JS의 한계</h2>
+    <p class="chapter-desc">감으로 써온 React, 이제 "왜" 쓰는지 이 소스와 비교하며 이해합니다.</p>
+    <div class="chapter-divider"></div>
+  </div>
+
+  <div class="section">
+    <h3>1. 이 소스의 문제점 — 상태와 화면이 분리 안 됨</h3>
+    <p>현재 소스에서 거래내역을 추가하면 아래 과정이 일어납니다.</p>
+    <div class="code-wrap">
+      <div class="code-label"><span>현재 방식 — transactions.js</span><span class="lang">JS</span></div>
+      <pre><span class="kw">function</span> <span class="fn">addTransaction</span>() {
+  <span class="cm">// 1. 데이터(상태) 변경</span>
+  transactions.<span class="fn">push</span>({ id: crypto.<span class="fn">randomUUID</span>(), ... });
+
+  <span class="cm">// 2. 저장</span>
+  <span class="fn">saveData</span>();
+
+  <span class="cm">// 3. 화면 직접 갱신 (수동!)</span>
+  <span class="fn">renderAll</span>();  <span class="cm">// ← 개발자가 직접 호출해야 함</span>
+  <span class="fn">clearForm</span>();
+  <span class="fn">showToast</span>(<span class="str">'✅ 저장되었습니다'</span>);
+}</pre>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <h4>Vanilla JS의 한계</h4>
+        <p>데이터를 바꿀 때마다 <strong>개발자가 직접 화면을 갱신</strong>해야 합니다.<br>
+        화면 여러 곳에서 같은 데이터를 보여줄수록 빠뜨리기 쉬워집니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>2. React의 해결 방법 — 상태가 바뀌면 화면이 자동 갱신</h3>
+    <div class="compare">
+      <div class="compare-box java" style="flex:none;width:100%;">
+        <div class="compare-title">🟨 Vanilla JS — 수동</div>
+        <pre>transactions.<span class="fn">push</span>(newTx);
+<span class="fn">renderAll</span>();  <span class="cm">// ← 개발자가 직접 호출</span></pre>
+      </div>
+    </div>
+    <div class="compare" style="margin-top:0;">
+      <div class="compare-box js" style="flex:none;width:100%;">
+        <div class="compare-title">⚛️ React — 자동</div>
+        <pre><span class="kw">const</span> [transactions, setTransactions] = <span class="fn">useState</span>([]);
+
+<span class="cm">// setTransactions 호출하면 React가 자동으로 화면 다시 그림</span>
+<span class="fn">setTransactions</span>(prev => [...prev, newTx]);
+<span class="cm">// ↑ renderAll() 같은 걸 직접 호출할 필요 없음</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">
+      <h4>React의 핵심 아이디어</h4>
+      <p><strong>"상태(state)가 바뀌면 화면(UI)이 자동으로 따라온다"</strong><br>
+      개발자는 "어떤 상태일 때 화면이 어떻게 보여야 하는가"만 선언하면 됩니다.<br>
+      이를 <strong>선언형(Declarative) UI</strong>라고 합니다.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ======================== CHAPTER 6.5 ======================== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-phase">Phase 2 — React 제대로</div>
+    <div class="chapter-num">Chapter 06 — 부록</div>
+    <h2>React에서 자주 쓰는<br>JS 문법 완전 정리</h2>
+    <p class="chapter-desc">Chapter 7부터 React 코드가 본격적으로 나옵니다. 그 전에 React 코드에서 <strong>반드시 나오는 JS 문법 8가지</strong>를 먼저 익힙니다. 이것만 이해하면 React 코드가 눈에 들어옵니다.</p>
+    <div class="chapter-divider"></div>
+  </div>
+
+  <div class="section">
+    <h3>1. 화살표 함수 (Arrow Function)</h3>
+    <p>React 코드에서 <code>function</code> 키워드 대신 <code>=&gt;</code>를 매우 많이 씁니다.<br>
+    기능은 같고, 쓰는 방식만 다릅니다.</p>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">일반 함수 vs 화살표 함수</span></div>
+      <pre><span class="cm">// 일반 함수</span>
+<span class="kw">function</span> <span class="fn">add</span>(a, b) {
+  <span class="kw">return</span> a + b;
+}
+
+<span class="cm">// 화살표 함수 — 완전한 형태</span>
+<span class="kw">const</span> <span class="fn">add</span> = (a, b) =&gt; {
+  <span class="kw">return</span> a + b;
+};
+
+<span class="cm">// 화살표 함수 — 한 줄이면 return과 {} 생략 가능</span>
+<span class="kw">const</span> <span class="fn">add</span> = (a, b) =&gt; a + b;
+
+<span class="cm">// 파라미터가 하나면 () 도 생략 가능</span>
+<span class="kw">const</span> <span class="fn">double</span> = n =&gt; n * <span class="num">2</span>;</pre>
+    </div>
+
+    <h4>React 코드에서 보이는 패턴</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">화살표 함수가 쓰이는 곳</span></div>
+      <pre><span class="cm">// 버튼 클릭 이벤트</span>
+&lt;button onClick={() =&gt; <span class="fn">setCount</span>(count + <span class="num">1</span>)}&gt;+&lt;/button&gt;
+<span class="cm">//              ↑ 파라미터 없으면 () 필수</span>
+
+<span class="cm">// 배열 map</span>
+transactions.<span class="fn">map</span>(tx =&gt; &lt;<span class="fn">TxRow</span> key={tx.id} tx={tx} /&gt;)
+<span class="cm">//           ↑ tx 하나씩 받아서 JSX 반환</span>
+
+<span class="cm">// 이벤트 핸들러에서 인자 전달할 때</span>
+&lt;button onClick={() =&gt; <span class="fn">onDelete</span>(tx.id)}&gt;삭제&lt;/button&gt;
+<span class="cm">// () => 로 한 번 감싸야 클릭할 때 실행됨</span>
+<span class="cm">// onClick={onDelete(tx.id)} 라고 쓰면 즉시 실행되어 버림 ❌</span></pre>
+    </div>
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <h4>onClick 함정 — 가장 많이 하는 실수</h4>
+        <p><code>onClick={onDelete(tx.id)}</code> → 렌더링될 때 <strong>즉시 실행</strong> (버튼 클릭 안 해도!) ❌<br>
+        <code>onClick={() =&gt; onDelete(tx.id)}</code> → 클릭할 때만 실행 ✅<br>
+        인자를 넘길 때는 반드시 <code>() =&gt;</code>로 감싸야 합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>2. 구조분해 할당 (Destructuring)</h3>
+    <p>객체나 배열에서 값을 꺼낼 때 변수명을 한 번에 지정하는 문법입니다.<br>
+    React의 <strong>props 받기</strong>와 <strong>useState</strong>에서 핵심적으로 씁니다.</p>
+
+    <h4>객체 구조분해</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">객체 구조분해</span></div>
+      <pre><span class="kw">const</span> tx = { id: <span class="str">'abc'</span>, date: <span class="str">'2026-01-01'</span>, amount: <span class="num">50000</span>, desc: <span class="str">'식비'</span> };
+
+<span class="cm">// ❌ 기존 방식</span>
+<span class="kw">const</span> id     = tx.id;
+<span class="kw">const</span> date   = tx.date;
+<span class="kw">const</span> amount = tx.amount;
+
+<span class="cm">// ✅ 구조분해</span>
+<span class="kw">const</span> { id, date, amount } = tx;
+
+<span class="cm">// 이름 바꾸기</span>
+<span class="kw">const</span> { amount: money } = tx;  <span class="cm">// money = 50000</span>
+
+<span class="cm">// 기본값 설정</span>
+<span class="kw">const</span> { note = <span class="str">''</span> } = tx;      <span class="cm">// tx.note가 없으면 ''</span></pre>
+    </div>
+
+    <h4>React props에서 구조분해</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">props 구조분해</span></div>
+      <pre><span class="cm">// ❌ 매번 props.tx, props.onDelete 써야 함</span>
+<span class="kw">function</span> <span class="fn">TxRow</span>(props) {
+  <span class="kw">return</span> &lt;td&gt;{props.tx.desc}&lt;/td&gt;;
+}
+
+<span class="cm">// ✅ 파라미터에서 바로 구조분해</span>
+<span class="kw">function</span> <span class="fn">TxRow</span>({ tx, onDelete }) {
+  <span class="kw">return</span> &lt;td&gt;{tx.desc}&lt;/td&gt;;
+}</pre>
+    </div>
+
+    <h4>배열 구조분해 — useState가 이 방식</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">배열 구조분해</span></div>
+      <pre><span class="cm">// useState는 [값, setter함수] 배열을 반환함</span>
+<span class="kw">const</span> result = <span class="fn">useState</span>(<span class="num">0</span>);    <span class="cm">// [0, function]</span>
+<span class="kw">const</span> count  = result[<span class="num">0</span>];       <span class="cm">// 꺼내는 게 번거로움</span>
+<span class="kw">const</span> setCount = result[<span class="num">1</span>];
+
+<span class="cm">// ✅ 배열 구조분해로 한 줄에</span>
+<span class="kw">const</span> [count, setCount] = <span class="fn">useState</span>(<span class="num">0</span>);
+<span class="cm">//      ↑이름은 자유롭게 지정 가능 (배열은 순서가 기준)</span></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>3. 스프레드 연산자 <code>...</code></h3>
+    <p>배열/객체를 펼쳐서 복사하거나 합칠 때 씁니다.<br>
+    React state 업데이트에서 <strong>새 배열/객체를 만들 때</strong> 필수입니다.</p>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">배열 스프레드</span></div>
+      <pre><span class="kw">const</span> a = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>];
+
+<span class="cm">// 배열 복사 (새 배열)</span>
+<span class="kw">const</span> b = [...a];             <span class="cm">// [1, 2, 3]</span>
+
+<span class="cm">// 뒤에 추가</span>
+<span class="kw">const</span> c = [...a, <span class="num">4</span>];          <span class="cm">// [1, 2, 3, 4]</span>
+
+<span class="cm">// 앞에 추가</span>
+<span class="kw">const</span> d = [<span class="num">0</span>, ...a];          <span class="cm">// [0, 1, 2, 3]</span>
+
+<span class="cm">// React state에서 거래 추가</span>
+<span class="fn">setTransactions</span>(prev =&gt; [...prev, newTx]);
+<span class="cm">//                        ↑ 기존 배열 펼치기 + 새 항목 추가</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">객체 스프레드</span></div>
+      <pre><span class="kw">const</span> user = { name: <span class="str">'홍길동'</span>, age: <span class="num">30</span> };
+
+<span class="cm">// 객체 복사</span>
+<span class="kw">const</span> copy = { ...user };
+
+<span class="cm">// 일부 값만 바꿔서 복사</span>
+<span class="kw">const</span> older = { ...user, age: <span class="num">31</span> };  <span class="cm">// { name: '홍길동', age: 31 }</span>
+
+<span class="cm">// React state에서 객체 일부 수정</span>
+<span class="fn">setForm</span>(prev =&gt; ({ ...prev, amount: <span class="str">'50000'</span> }));
+<span class="cm">// ↑ prev 전체 유지 + amount만 교체</span></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>4. 삼항 연산자 <code>? :</code></h3>
+    <p>JSX 안에서는 <code>if</code>문을 직접 쓸 수 없습니다.<br>
+    대신 <strong>삼항 연산자</strong>로 조건에 따라 다른 내용을 렌더링합니다.</p>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">삼항 연산자 기본</span></div>
+      <pre><span class="cm">// if문</span>
+<span class="kw">if</span> (isLoggedIn) {
+  msg = <span class="str">'환영합니다'</span>;
+} <span class="kw">else</span> {
+  msg = <span class="str">'로그인하세요'</span>;
+}
+
+<span class="cm">// 삼항 연산자 — 한 줄</span>
+<span class="kw">const</span> msg = isLoggedIn ? <span class="str">'환영합니다'</span> : <span class="str">'로그인하세요'</span>;
+<span class="cm">//          ↑조건      ↑참일 때      ↑거짓일 때</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">JSX 안에서 삼항 연산자</span></div>
+      <pre><span class="kw">function</span> <span class="fn">Amount</span>({ value }) {
+  <span class="kw">return</span> (
+    &lt;span style={{ color: value &lt; <span class="num">0</span> ? <span class="str">'red'</span> : <span class="str">'black'</span> }}&gt;
+      {value &lt; <span class="num">0</span> ? <span class="str">'마이너스'</span> : <span class="fn">fmtKrw</span>(value)}
+    &lt;/span&gt;
+  );
+}
+
+<span class="cm">// 자금일보 render.js 와 동일한 로직</span>
+<span class="cm">// const isNeg = v &lt; 0;</span>
+<span class="cm">// const cls = isNeg ? 'negative-balance' : '';</span></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>5. 단락 평가 <code>&&</code> — 조건부 렌더링</h3>
+    <p>React에서 "조건이 참일 때만 보여줘"를 구현하는 가장 흔한 패턴입니다.</p>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">&& 단락 평가 원리</span></div>
+      <pre><span class="cm">// JS에서 && 는 왼쪽이 falsy면 왼쪽을 반환, truthy면 오른쪽 반환</span>
+<span class="kw">false</span> &amp;&amp; <span class="str">'안 보임'</span>   <span class="cm">// → false (렌더링 안 됨)</span>
+<span class="kw">true</span>  &amp;&amp; <span class="str">'보임'</span>      <span class="cm">// → '보임'</span>
+<span class="num">0</span>     &amp;&amp; <span class="str">'안 보임'</span>   <span class="cm">// → 0 (주의! 0이 화면에 출력됨)</span>
+
+<span class="cm">// JSX에서 활용</span>
+{isNegative &amp;&amp; &lt;span className=<span class="str">"warn"</span>&gt;잔액 부족&lt;/span&gt;}
+<span class="cm">// isNegative가 true일 때만 span 렌더링</span>
+
+{transactions.length &gt; <span class="num">0</span> &amp;&amp; &lt;<span class="fn">TxList</span> /&gt;}
+<span class="cm">// transactions가 있을 때만 목록 렌더링</span>
+
+<span class="cm">// ⚠️ 숫자 0 주의</span>
+{count &amp;&amp; &lt;p&gt;{count}개&lt;/p&gt;}   <span class="cm">// count=0이면 "0" 출력됨 ❌</span>
+{count &gt; <span class="num">0</span> &amp;&amp; &lt;p&gt;{count}개&lt;/p&gt;} <span class="cm">// 이렇게 명시적으로 ✅</span></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>6. 옵셔널 체이닝 <code>?.</code> 과 null 병합 <code>??</code></h3>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">?. — 없으면 undefined, 에러 안 남</span></div>
+      <pre><span class="kw">const</span> user = <span class="kw">null</span>;
+
+<span class="cm">// ❌ 에러 발생: Cannot read properties of null</span>
+user.name
+
+<span class="cm">// ✅ undefined 반환 (에러 없음)</span>
+user?.name
+
+<span class="cm">// 체이닝도 가능</span>
+user?.address?.city   <span class="cm">// user 또는 address가 null이면 undefined</span>
+
+<span class="cm">// 자금일보 소스에서</span>
+document.<span class="fn">getElementById</span>(<span class="str">'filter-type'</span>)?.value
+<span class="cm">// 요소가 없으면 에러 대신 undefined</span></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">?? — null/undefined일 때만 기본값</span></div>
+      <pre><span class="cm">// || 은 falsy(0, '', false)도 기본값으로 대체함</span>
+<span class="num">0</span>     || <span class="str">'기본'</span>   <span class="cm">// → '기본'  (0도 대체됨, 의도치 않을 수 있음)</span>
+<span class="str">''</span>    || <span class="str">'기본'</span>   <span class="cm">// → '기본'</span>
+
+<span class="cm">// ?? 는 null / undefined 일 때만 기본값</span>
+<span class="num">0</span>     ?? <span class="str">'기본'</span>   <span class="cm">// → 0      (0은 유효한 값으로 취급)</span>
+<span class="str">''</span>    ?? <span class="str">'기본'</span>   <span class="cm">// → ''</span>
+<span class="kw">null</span>  ?? <span class="str">'기본'</span>   <span class="cm">// → '기본'</span>
+
+<span class="cm">// 자금일보 utils.js에서</span>
+<span class="kw">return</span> el?.value ?? <span class="str">''</span>;
+<span class="cm">// el이 null이면 ''  /  el.value가 0이면 0 그대로</span></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>7. 템플릿 리터럴 <code>` `</code></h3>
+    <p>백틱(`)으로 감싸는 문자열입니다. <code>${}</code> 안에 JS 표현식을 넣을 수 있습니다.</p>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">템플릿 리터럴</span></div>
+      <pre><span class="kw">const</span> name   = <span class="str">'홍길동'</span>;
+<span class="kw">const</span> amount = <span class="num">50000</span>;
+
+<span class="cm">// 기존 문자열 연결</span>
+<span class="kw">const</span> msg1 = name + <span class="str">'님이 '</span> + amount + <span class="str">'원을 입금했습니다'</span>;
+
+<span class="cm">// 템플릿 리터럴</span>
+<span class="kw">const</span> msg2 = <span class="str">`</span>${name}<span class="str">님이 </span>${amount.<span class="fn">toLocaleString</span>()}<span class="str">원을 입금했습니다`</span>;
+
+<span class="cm">// 여러 줄도 가능</span>
+<span class="kw">const</span> html = <span class="str">`
+  &lt;tr&gt;
+    &lt;td&gt;</span>${name}<span class="str">&lt;/td&gt;
+    &lt;td&gt;</span>${amount}<span class="str">&lt;/td&gt;
+  &lt;/tr&gt;
+`</span>;
+<span class="cm">// 자금일보 render.js에서 이 방식을 많이 씀</span></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>8. 모듈 import / export</h3>
+    <p>React 프로젝트(Vite/CRA)에서는 파일 간에 <code>import</code>/<code>export</code>로 코드를 주고받습니다.<br>
+    자금일보는 <code>&lt;script&gt;</code> 태그 순서로 전역 공유하지만, React는 이 방식을 씁니다.</p>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">export / import 기본</span></div>
+      <pre><span class="cm">// utils.js — 내보내기</span>
+<span class="kw">export function</span> <span class="fn">fmtKrw</span>(n) {
+  <span class="kw">return</span> <span class="str">'₩ '</span> + n.<span class="fn">toLocaleString</span>(<span class="str">'ko-KR'</span>);
+}
+
+<span class="kw">export const</span> TAX_RATE = <span class="num">0.1</span>;
+
+<span class="cm">// 기본 내보내기 (파일당 하나)</span>
+<span class="kw">export default function</span> <span class="fn">App</span>() { ... }
+
+<span class="cm">// ─────────────────────────────────────</span>
+
+<span class="cm">// TxRow.jsx — 가져오기</span>
+<span class="kw">import</span> App <span class="kw">from</span> <span class="str">'./App'</span>;            <span class="cm">// default import</span>
+<span class="kw">import</span> { fmtKrw, TAX_RATE } <span class="kw">from</span> <span class="str">'./utils'</span>;  <span class="cm">// named import</span>
+<span class="kw">import</span> React, { useState, useEffect } <span class="kw">from</span> <span class="str">'react'</span>;</pre>
+    </div>
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <h4>자금일보 vs React 프로젝트 비교</h4>
+        <p>자금일보: <code>&lt;script src="utils.js"&gt;</code> → 전역 함수로 공유<br>
+        React 프로젝트: <code>import { fmtKrw } from './utils'</code> → 필요한 것만 명시적으로 가져옴<br>
+        React는 import/export 덕분에 <strong>어디서 왔는지 명확</strong>하고 순서를 신경 쓸 필요 없습니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>전체 요약 — React 코드 읽는 법</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">실제 React 컴포넌트 한 눈에 보기</span></div>
+      <pre><span class="kw">import</span> { useState } <span class="kw">from</span> <span class="str">'react'</span>;        <span class="cm">// ← 8. import</span>
+<span class="kw">import</span> { fmtKrw }   <span class="kw">from</span> <span class="str">'./utils'</span>;
+
+<span class="kw">export default function</span> <span class="fn">TxRow</span>({ tx, onDelete }) {  <span class="cm">// ← 2. 구조분해 props</span>
+  <span class="kw">const</span> [hover, setHover] = <span class="fn">useState</span>(<span class="kw">false</span>);  <span class="cm">// ← 2. 배열 구조분해</span>
+
+  <span class="kw">return</span> (
+    &lt;tr
+      style={{ background: hover ? <span class="str">'#f0f0f0'</span> : <span class="str">'white'</span> }}  <span class="cm">// ← 4. 삼항</span>
+      onMouseEnter={() =&gt; <span class="fn">setHover</span>(<span class="kw">true</span>)}   <span class="cm">// ← 1. 화살표 함수</span>
+      onMouseLeave={() =&gt; <span class="fn">setHover</span>(<span class="kw">false</span>)}
+    &gt;
+      &lt;td&gt;{tx?.desc ?? <span class="str">'-'</span>}&lt;/td&gt;           <span class="cm">// ← 6. ?. 와 ??</span>
+      &lt;td&gt;{<span class="fn">fmtKrw</span>(tx.amount)}&lt;/td&gt;
+      {tx.amount &lt; <span class="num">0</span> &amp;&amp; &lt;td className=<span class="str">"warn"</span>&gt;⚠️&lt;/td&gt;}  <span class="cm">// ← 5. &&</span>
+      &lt;td&gt;
+        &lt;button onClick={() =&gt; <span class="fn">onDelete</span>(tx.id)}&gt;   <span class="cm">// ← 1. 화살표 함수</span>
+          삭제
+        &lt;/button&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  );
+}</pre>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">빠른 확인</div>
+    <h4>다음 코드에서 사용된 문법은?</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">문제</span></div>
+      <pre><span class="kw">const</span> [items, setItems] = <span class="fn">useState</span>([]);
+<span class="fn">setItems</span>(prev =&gt; [...prev, newItem]);
+{items.length &gt; <span class="num">0</span> &amp;&amp; &lt;<span class="fn">List</span> items={items} /&gt;}
+&lt;button onClick={() =&gt; <span class="fn">setItems</span>([])}&gt;초기화&lt;/button&gt;</pre>
+    </div>
+    <ol>
+      <li>첫 줄에 쓰인 JS 문법 두 가지는? (힌트: 배열, Hook)</li>
+      <li><code>prev =&gt; [...prev, newItem]</code> — 화살표 함수 + ___?</li>
+      <li><code>items.length &gt; 0 &amp;&amp;</code> — 이 패턴의 이름은?</li>
+      <li><code>onClick={() =&gt; setItems([])}</code> — 왜 () =&gt; 로 감쌌나요?</li>
+    </ol>
+    <div class="hint">정답: 배열 구조분해 + useState / 스프레드 / 단락평가(조건부 렌더링) / 클릭 시에만 실행되게</div>
+  </div>
+</div>
+
+<!-- ======================== CHAPTER 7 ======================== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-phase">Phase 2 — React 제대로</div>
+    <div class="chapter-num">Chapter 07</div>
+    <h2>컴포넌트 · JSX · props · state</h2>
+    <p class="chapter-desc">감으로 하던 React를 원리로 이해합니다. 컴포넌트가 뭔지, JSX가 뭔지, props와 state의 차이가 뭔지 자금일보 코드와 비교하며 배웁니다.</p>
+    <div class="chapter-divider"></div>
+  </div>
+
+  <div class="section">
+    <h3>1. 컴포넌트 — 화면의 조각</h3>
+    <p>React에서 화면은 <strong>컴포넌트(Component)</strong>라는 조각들로 이루어집니다.<br>
+    컴포넌트는 <strong>함수 하나</strong>입니다. HTML을 반환하는 함수입니다.</p>
+    <div class="compare">
+      <div class="compare-box java">
+        <div class="compare-title">🟨 Vanilla JS (render.js)</div>
+        <pre><span class="cm">// 거래 한 행을 문자열로 반환하는 함수</span>
+<span class="kw">function</span> <span class="fn">renderRow</span>(tx) {
+  <span class="kw">return</span> <span class="str">`&lt;tr&gt;
+    &lt;td&gt;</span>${<span class="fn">fmtDate</span>(tx.date)}<span class="str">&lt;/td&gt;
+    &lt;td&gt;</span>${<span class="fn">esc</span>(tx.desc)}<span class="str">&lt;/td&gt;
+  &lt;/tr&gt;`</span>;
+}
+<span class="cm">// 직접 innerHTML에 주입</span>
+tbody.innerHTML = list.<span class="fn">map</span>(renderRow).<span class="fn">join</span>(<span class="str">''</span>);</pre>
+      </div>
+      <div class="compare-box js">
+        <div class="compare-title">⚛️ React</div>
+        <pre><span class="cm">// 같은 역할을 하는 React 컴포넌트</span>
+<span class="kw">function</span> <span class="fn">TxRow</span>({ tx }) {          <span class="cm">// props 받음</span>
+  <span class="kw">return</span> (
+    &lt;tr&gt;
+      &lt;td&gt;{<span class="fn">fmtDate</span>(tx.date)}&lt;/td&gt;
+      &lt;td&gt;{tx.desc}&lt;/td&gt;
+    &lt;/tr&gt;
+  );
+}
+<span class="cm">// JSX 안에서 사용</span>
+&lt;tbody&gt;{list.<span class="fn">map</span>(tx =&gt; &lt;<span class="fn">TxRow</span> key={tx.id} tx={tx} /&gt;)}&lt;/tbody&gt;</pre>
+      </div>
+    </div>
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <h4>컴포넌트 이름은 대문자로 시작</h4>
+        <p>React는 소문자 태그(<code>&lt;tr&gt;</code>)는 HTML 태그로, 대문자 태그(<code>&lt;TxRow&gt;</code>)는 컴포넌트로 구분합니다.<br>
+        <code>function txRow</code> → 소문자면 React가 컴포넌트로 인식하지 않습니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>2. JSX — JS 안의 HTML처럼 생긴 문법</h3>
+    <p>JSX는 HTML이 아닙니다. <strong>JavaScript입니다.</strong><br>
+    빌드 도구(Babel/Vite)가 JSX를 <code>React.createElement()</code> 호출로 변환합니다.</p>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">JSX → JS 변환 예시</span></div>
+      <pre><span class="cm">// 개발자가 쓰는 JSX</span>
+<span class="kw">const</span> el = &lt;h1 className=<span class="str">"title"</span>&gt;안녕&lt;/h1&gt;;
+
+<span class="cm">// Babel이 변환한 실제 JS</span>
+<span class="kw">const</span> el = React.<span class="fn">createElement</span>(<span class="str">'h1'</span>, { className: <span class="str">'title'</span> }, <span class="str">'안녕'</span>);</pre>
+    </div>
+    <h4>JSX 주의사항 3가지</h4>
+    <table>
+      <tr><th>규칙</th><th>이유</th><th>예시</th></tr>
+      <tr><td><code>class</code> → <code>className</code></td><td><code>class</code>는 JS 예약어</td><td><code>&lt;div className="card"&gt;</code></td></tr>
+      <tr><td>태그는 반드시 닫기</td><td>JSX는 XML 규칙</td><td><code>&lt;input /&gt;</code> (슬래시 필요)</td></tr>
+      <tr><td>루트 태그 하나</td><td>함수는 값 하나 반환</td><td><code>&lt;&gt;…&lt;/&gt;</code> (빈 태그 사용)</td></tr>
+    </table>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">JSX — { } 안에 JS 표현식</span></div>
+      <pre><span class="kw">function</span> <span class="fn">Amount</span>({ value, isUsd }) {
+  <span class="kw">return</span> (
+    &lt;span style={{ color: value &lt; <span class="num">0</span> ? <span class="str">'red'</span> : <span class="str">'black'</span> }}&gt;
+      {isUsd ? <span class="fn">fmtUsd</span>(value) : <span class="fn">fmtKrw</span>(value)}
+    &lt;/span&gt;
+  );
+}
+<span class="cm">// { } 안에는 JS 표현식만 가능 (if문 X, 삼항연산자 O)</span></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>3. props — 부모가 자식에게 주는 데이터</h3>
+    <p>컴포넌트에 HTML 속성처럼 값을 전달하면, 자식 함수의 첫 번째 인자로 옵니다.</p>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">props 전달과 수신</span></div>
+      <pre><span class="cm">// 부모 컴포넌트</span>
+<span class="kw">function</span> <span class="fn">TransactionList</span>({ transactions }) {
+  <span class="kw">return</span> (
+    &lt;table&gt;
+      &lt;tbody&gt;
+        {transactions.<span class="fn">map</span>(tx =&gt; (
+          &lt;<span class="fn">TxRow</span>
+            key={tx.id}         <span class="cm">// key: React 내부 최적화용, props 아님</span>
+            tx={tx}             <span class="cm">// tx prop 전달</span>
+            onDelete={<span class="fn">handleDelete</span>}  <span class="cm">// 함수도 prop으로 전달 가능</span>
+          /&gt;
+        ))}
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  );
+}
+
+<span class="cm">// 자식 컴포넌트</span>
+<span class="kw">function</span> <span class="fn">TxRow</span>({ tx, onDelete }) {  <span class="cm">// 구조분해로 받음</span>
+  <span class="kw">return</span> (
+    &lt;tr&gt;
+      &lt;td&gt;{tx.desc}&lt;/td&gt;
+      &lt;td&gt;&lt;button onClick={() =&gt; <span class="fn">onDelete</span>(tx.id)}&gt;삭제&lt;/button&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  );
+}</pre>
+    </div>
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <h4>props는 읽기 전용</h4>
+        <p>자식 컴포넌트에서 <code>props.tx.amount = 999</code>처럼 수정하면 안 됩니다.<br>
+        데이터를 바꾸려면 부모에서 받은 <strong>함수(onDelete 같은)</strong>를 호출해야 합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>4. state — 컴포넌트가 기억하는 값</h3>
+    <p>state는 컴포넌트가 <strong>내부적으로 관리하는 데이터</strong>입니다.<br>
+    state가 바뀌면 React가 자동으로 화면을 다시 그립니다.</p>
+    <div class="compare">
+      <div class="compare-box java">
+        <div class="compare-title">🟨 Vanilla JS — 전역 변수 + 수동 렌더</div>
+        <pre><span class="cm">// state.js</span>
+<span class="kw">let</span> transactions = [];  <span class="cm">// 전역 변수</span>
+
+<span class="cm">// transactions.js</span>
+transactions.<span class="fn">push</span>(newTx);
+<span class="fn">saveData</span>();
+<span class="fn">renderAll</span>();  <span class="cm">// 수동으로 화면 갱신</span></pre>
+      </div>
+      <div class="compare-box js">
+        <div class="compare-title">⚛️ React — state + 자동 렌더</div>
+        <pre><span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">const</span> [transactions, setTransactions]
+    = <span class="fn">useState</span>([]);  <span class="cm">// state 선언</span>
+
+  <span class="kw">function</span> <span class="fn">addTx</span>(newTx) {
+    <span class="fn">setTransactions</span>(prev =&gt; [...prev, newTx]);
+    <span class="cm">// setTransactions 호출 → 자동 재렌더</span>
+  }
+}</pre>
+      </div>
+    </div>
+    <h4>props vs state 비교</h4>
+    <table>
+      <tr><th>구분</th><th>props</th><th>state</th></tr>
+      <tr><td>출처</td><td>부모가 줌</td><td>컴포넌트 내부</td></tr>
+      <tr><td>수정</td><td>읽기 전용</td><td>setter 함수로만</td></tr>
+      <tr><td>바뀌면?</td><td>부모가 다시 전달해야 함</td><td>자동으로 재렌더</td></tr>
+      <tr><td>Java 비유</td><td>메서드 파라미터</td><td>인스턴스 필드</td></tr>
+    </table>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">연습문제</div>
+    <h4>개념 확인</h4>
+    <ol>
+      <li>컴포넌트 이름이 소문자면 React가 어떻게 해석하나요?</li>
+      <li>JSX에서 <code>class</code> 대신 써야 하는 속성명은?</li>
+      <li>자식 컴포넌트에서 props 값을 직접 수정하면 안 되는 이유는?</li>
+      <li>state가 바뀌면 React는 어떤 동작을 자동으로 합니까?</li>
+    </ol>
+    <div class="hint">힌트: props = 파라미터(읽기전용), state = 인스턴스 필드(setter로만 변경)</div>
+  </div>
+</div>
+
+<!-- ======================== CHAPTER 8 ======================== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-phase">Phase 2 — React 제대로</div>
+    <div class="chapter-num">Chapter 08</div>
+    <h2>useEffect · useState 원리</h2>
+    <p class="chapter-desc">React의 핵심 Hook 두 가지를 깊이 이해합니다. 언제 실행되는지, 왜 그렇게 설계됐는지 data.js와 비교하며 배웁니다.</p>
+    <div class="chapter-divider"></div>
+  </div>
+
+  <div class="section">
+    <h3>1. useState 원리 — 왜 직접 변수를 못 쓰나?</h3>
+    <p>React 컴포넌트는 state가 바뀔 때마다 <strong>함수 전체가 다시 실행</strong>됩니다.<br>
+    그러므로 <code>let count = 0</code>처럼 로컬 변수를 쓰면 매번 0으로 초기화됩니다.</p>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">useState 내부 동작 (개념)</span></div>
+      <pre><span class="cm">// 이런 식으로 동작한다고 이해하면 됨</span>
+<span class="kw">let</span> _state = [];          <span class="cm">// React가 외부에 보관</span>
+
+<span class="kw">function</span> <span class="fn">useState</span>(initial) {
+  <span class="kw">if</span> (_state === undefined) _state = initial;
+
+  <span class="kw">function</span> <span class="fn">setState</span>(newValue) {
+    _state = newValue;
+    <span class="fn">rerender</span>();           <span class="cm">// 컴포넌트 다시 실행!</span>
+  }
+  <span class="kw">return</span> [_state, setState];
+}
+
+<span class="cm">// 컴포넌트 함수는 매 렌더마다 실행되지만,</span>
+<span class="cm">// _state는 React가 외부에 보관하므로 값이 유지됨</span></pre>
+    </div>
+    <h4>state 업데이트 패턴</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">올바른 state 업데이트</span></div>
+      <pre><span class="kw">const</span> [transactions, setTransactions] = <span class="fn">useState</span>([]);
+
+<span class="cm">// ❌ 잘못된 방법 — 직접 수정은 React가 변화를 감지 못함</span>
+transactions.<span class="fn">push</span>(newTx);
+<span class="fn">setTransactions</span>(transactions);  <span class="cm">// 같은 배열 참조라 변화 없음</span>
+
+<span class="cm">// ✅ 올바른 방법 — 새 배열을 만들어서 전달</span>
+<span class="fn">setTransactions</span>(prev =&gt; [...prev, newTx]);
+
+<span class="cm">// ✅ 삭제도 마찬가지</span>
+<span class="fn">setTransactions</span>(prev =&gt; prev.<span class="fn">filter</span>(t =&gt; t.id !== id));</pre>
+    </div>
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <h4>배열/객체는 반드시 새로 만들어서 set</h4>
+        <p>React는 참조(주소)를 비교합니다. <code>push</code>로 기존 배열을 수정하면 같은 주소이므로 바뀐 것으로 인식하지 않습니다.<br>
+        스프레드(<code>[...prev, newTx]</code>)나 <code>map</code>/<code>filter</code>로 <strong>새 배열을 만들어야</strong> 합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>2. useEffect — 사이드이펙트를 분리하는 Hook</h3>
+    <p><strong>사이드이펙트(Side Effect)</strong>란 렌더링과 직접 관계없는 작업입니다.<br>
+    예: API 호출, localStorage 저장, 이벤트 리스너 등록, 타이머 설정</p>
+    <div class="compare">
+      <div class="compare-box java">
+        <div class="compare-title">🟨 Vanilla JS (app.js)</div>
+        <pre><span class="cm">// init 함수에서 초기화</span>
+(<span class="kw">async function</span> <span class="fn">init</span>() {
+  <span class="kw">await</span> <span class="fn">loadInitBalance</span>();
+  <span class="kw">await</span> <span class="fn">loadData</span>();
+  <span class="fn">renderAll</span>();
+})()</pre>
+      </div>
+      <div class="compare-box js">
+        <div class="compare-title">⚛️ React — useEffect</div>
+        <pre><span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">const</span> [txs, setTxs] = <span class="fn">useState</span>([]);
+
+  <span class="fn">useEffect</span>(() =&gt; {
+    <span class="cm">// 컴포넌트가 처음 화면에 나타날 때 실행</span>
+    <span class="fn">loadData</span>().<span class="fn">then</span>(data =&gt; <span class="fn">setTxs</span>(data));
+  }, []);  <span class="cm">// ← [] : 최초 1회만</span>
+}</pre>
+      </div>
+    </div>
+
+    <h4>useEffect의 세 가지 패턴</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">dependency array 패턴</span></div>
+      <pre><span class="cm">// 1. 매 렌더마다 실행 (dependency 없음)</span>
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="fn">saveData</span>(transactions);
+});
+
+<span class="cm">// 2. 최초 1회만 실행 (빈 배열)</span>
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="fn">loadData</span>();
+}, []);
+
+<span class="cm">// 3. 특정 값이 바뀔 때만 실행</span>
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="fn">saveData</span>(transactions);
+}, [transactions]);  <span class="cm">// transactions 바뀔 때마다</span></pre>
+    </div>
+
+    <h4>cleanup — 정리 함수</h4>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">이벤트 리스너 등록 / 해제</span></div>
+      <pre><span class="fn">useEffect</span>(() =&gt; {
+  <span class="cm">// 등록</span>
+  <span class="kw">const</span> <span class="fn">handleResize</span> = () =&gt; console.<span class="fn">log</span>(<span class="str">'resize'</span>);
+  window.<span class="fn">addEventListener</span>(<span class="str">'resize'</span>, handleResize);
+
+  <span class="cm">// cleanup: 컴포넌트가 사라질 때 자동 실행</span>
+  <span class="kw">return</span> () =&gt; {
+    window.<span class="fn">removeEventListener</span>(<span class="str">'resize'</span>, handleResize);
+  };
+}, []);</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>3. React 생명주기 vs useEffect</h3>
+    <p>클래스 컴포넌트 시대의 생명주기 메서드는 함수 컴포넌트에서 useEffect 하나로 통합됩니다.</p>
+    <table>
+      <tr><th>클래스 컴포넌트</th><th>함수 컴포넌트 (useEffect)</th><th>시점</th></tr>
+      <tr><td><code>componentDidMount</code></td><td><code>useEffect(() =&gt; {}, [])</code></td><td>최초 마운트 후</td></tr>
+      <tr><td><code>componentDidUpdate</code></td><td><code>useEffect(() =&gt; {}, [deps])</code></td><td>deps 변경 후</td></tr>
+      <tr><td><code>componentWillUnmount</code></td><td><code>useEffect(() =&gt; { return () =&gt; {} }, [])</code></td><td>언마운트 전</td></tr>
+    </table>
+    <div class="callout good">
+      <div class="callout-icon">✅</div>
+      <div class="callout-body">
+        <h4>요즘 React는 함수형 컴포넌트가 표준</h4>
+        <p>2019년 Hook 도입 이후 클래스 컴포넌트는 더 이상 권장하지 않습니다.<br>
+        새 프로젝트라면 처음부터 함수형 + Hook으로 작성하세요.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">연습문제</div>
+    <h4>useEffect 패턴 고르기</h4>
+    <ol>
+      <li>앱이 처음 열릴 때 서버에서 데이터를 불러오려면? → <code>useEffect(() =&gt; {}, ___)</code></li>
+      <li>검색어(<code>query</code>)가 바뀔 때마다 검색 API를 호출하려면?</li>
+      <li>배열을 state로 업데이트할 때 <code>push</code>를 쓰면 안 되는 이유는?</li>
+    </ol>
+    <div class="hint">힌트: [], [query], 참조 비교</div>
+  </div>
+</div>
+
+<!-- ======================== CHAPTER 9 ======================== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-phase">Phase 2 — React 제대로</div>
+    <div class="chapter-num">Chapter 09</div>
+    <h2>자금일보를 React로 바꾸면?</h2>
+    <p class="chapter-desc">실제 Vanilla JS 코드를 React로 변환합니다. 같은 기능을 두 가지 방식으로 보며 React의 동작 방식을 몸으로 익힙니다.</p>
+    <div class="chapter-divider"></div>
+  </div>
+
+  <div class="section">
+    <h3>1. 전체 구조 변환 비교</h3>
+    <table>
+      <tr><th>Vanilla JS 파일</th><th>React 컴포넌트</th><th>역할</th></tr>
+      <tr><td>state.js (전역 변수)</td><td>App.jsx (useState)</td><td>데이터 보관</td></tr>
+      <tr><td>render.js (renderAll)</td><td>각 컴포넌트 반환값</td><td>화면 그리기</td></tr>
+      <tr><td>transactions.js</td><td>TransactionForm.jsx</td><td>입력/삭제 로직</td></tr>
+      <tr><td>report.js</td><td>ReportPage.jsx</td><td>보고서 탭</td></tr>
+      <tr><td>app.js (switchTab)</td><td>App.jsx (activeTab state)</td><td>탭 전환</td></tr>
+      <tr><td>data.js (loadData)</td><td>useEffect ([])</td><td>초기 데이터 로드</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h3>2. 탭 전환 변환</h3>
+    <div class="compare">
+      <div class="compare-box java">
+        <div class="compare-title">🟨 Vanilla JS (app.js)</div>
+        <pre><span class="kw">function</span> <span class="fn">switchTab</span>(name) {
+  document.<span class="fn">querySelectorAll</span>(<span class="str">'.page'</span>)
+    .<span class="fn">forEach</span>(p =&gt; p.classList.<span class="fn">remove</span>(<span class="str">'active'</span>));
+  document.<span class="fn">getElementById</span>(<span class="str">'page-'</span> + name)
+    .classList.<span class="fn">add</span>(<span class="str">'active'</span>);
+}</pre>
+      </div>
+      <div class="compare-box js">
+        <div class="compare-title">⚛️ React</div>
+        <pre><span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">const</span> [tab, setTab] = <span class="fn">useState</span>(<span class="str">'input'</span>);
+
+  <span class="kw">return</span> (
+    &lt;&gt;
+      &lt;nav&gt;
+        &lt;button onClick={() =&gt; <span class="fn">setTab</span>(<span class="str">'input'</span>)}&gt;입력&lt;/button&gt;
+        &lt;button onClick={() =&gt; <span class="fn">setTab</span>(<span class="str">'report'</span>)}&gt;보고서&lt;/button&gt;
+      &lt;/nav&gt;
+      {tab === <span class="str">'input'</span>  &amp;&amp; &lt;<span class="fn">InputPage</span> /&gt;}
+      {tab === <span class="str">'report'</span> &amp;&amp; &lt;<span class="fn">ReportPage</span> /&gt;}
+    &lt;/&gt;
+  );
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>3. 거래 추가 변환</h3>
+    <div class="compare">
+      <div class="compare-box java">
+        <div class="compare-title">🟨 Vanilla JS (transactions.js)</div>
+        <pre><span class="kw">function</span> <span class="fn">addTransaction</span>() {
+  <span class="kw">const</span> date   = <span class="fn">getVal</span>(<span class="str">'f-date'</span>);
+  <span class="kw">const</span> amount = <span class="fn">parseAmount</span>(<span class="fn">getVal</span>(<span class="str">'f-amount'</span>));
+  <span class="kw">const</span> desc   = <span class="fn">getVal</span>(<span class="str">'f-desc'</span>).<span class="fn">trim</span>();
+
+  transactions.<span class="fn">push</span>({
+    id: crypto.<span class="fn">randomUUID</span>(),
+    date, amount, desc
+  });
+  <span class="fn">saveData</span>();
+  <span class="fn">renderAll</span>();
+}</pre>
+      </div>
+      <div class="compare-box js">
+        <div class="compare-title">⚛️ React</div>
+        <pre><span class="kw">function</span> <span class="fn">TransactionForm</span>({ onAdd }) {
+  <span class="kw">const</span> [date,   setDate]   = <span class="fn">useState</span>(<span class="str">''</span>);
+  <span class="kw">const</span> [amount, setAmount] = <span class="fn">useState</span>(<span class="str">''</span>);
+  <span class="kw">const</span> [desc,   setDesc]   = <span class="fn">useState</span>(<span class="str">''</span>);
+
+  <span class="kw">function</span> <span class="fn">handleSubmit</span>() {
+    <span class="fn">onAdd</span>({ id: crypto.<span class="fn">randomUUID</span>(),
+              date, amount: <span class="fn">parseAmount</span>(amount), desc });
+    <span class="fn">setAmount</span>(<span class="str">''</span>); <span class="fn">setDesc</span>(<span class="str">''</span>);
+  }
+
+  <span class="kw">return</span> (
+    &lt;div&gt;
+      &lt;input value={date}   onChange={e =&gt; <span class="fn">setDate</span>(e.target.value)}   /&gt;
+      &lt;input value={amount} onChange={e =&gt; <span class="fn">setAmount</span>(e.target.value)} /&gt;
+      &lt;input value={desc}   onChange={e =&gt; <span class="fn">setDesc</span>(e.target.value)}   /&gt;
+      &lt;button onClick={<span class="fn">handleSubmit</span>}&gt;추가&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</pre>
+      </div>
+    </div>
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <h4>제어 컴포넌트(Controlled Component)</h4>
+        <p>React에서 <code>&lt;input value={...}&gt;</code>처럼 state로 값을 제어하는 패턴을 <strong>제어 컴포넌트</strong>라 합니다.<br>
+        Vanilla JS의 <code>getVal('f-amount')</code> = DOM에서 직접 읽기 vs React = state에서 읽기</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>4. 데이터 로드 변환</h3>
+    <div class="compare">
+      <div class="compare-box java">
+        <div class="compare-title">🟨 Vanilla JS (app.js)</div>
+        <pre>(<span class="kw">async function</span> <span class="fn">init</span>() {
+  <span class="kw">await</span> <span class="fn">loadData</span>();
+  <span class="fn">renderAll</span>();
+})()</pre>
+      </div>
+      <div class="compare-box js">
+        <div class="compare-title">⚛️ React</div>
+        <pre><span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">const</span> [txs, setTxs] = <span class="fn">useState</span>([]);
+
+  <span class="fn">useEffect</span>(() =&gt; {
+    <span class="fn">loadData</span>().<span class="fn">then</span>(data =&gt; <span class="fn">setTxs</span>(data));
+  }, []);  <span class="cm">// 최초 1회 = init()</span>
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout good">
+    <div class="callout-icon">✅</div>
+    <div class="callout-body">
+      <h4>지금 바로 바꿔야 할까요?</h4>
+      <p>현재 Vanilla JS로 잘 동작하는 앱을 React로 바꾸는 것은 <strong>리팩토링 비용이 큽니다.</strong><br>
+      새 기능을 추가하거나, 규모가 커지거나, 팀이 생길 때 React 전환을 검토하세요.<br>
+      지금은 <strong>원리를 이해하는 것</strong>이 목표입니다.</p>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">연습문제</div>
+    <h4>변환 실습</h4>
+    <ol>
+      <li>Vanilla JS의 <code>showToast(msg)</code> 함수를 React 컴포넌트로 바꾸려면 어떤 state가 필요한가요?</li>
+      <li><code>deleteTransaction(id)</code>을 React로 바꿀 때 부모/자식 중 어디에 state가 있어야 하나요?</li>
+      <li>React 제어 컴포넌트에서 input 값은 어디서 읽나요?</li>
+    </ol>
+    <div class="hint">힌트: toast 표시 여부/메시지 state, 최상위 App에 transactions state, e.target.value가 아닌 state</div>
+  </div>
+</div>
+
+<!-- ======================== CHAPTER 10 ======================== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-phase">Phase 3 — Git · 빌드 · 배포</div>
+    <div class="chapter-num">Chapter 10</div>
+    <h2>Git 기초 — commit · branch · push</h2>
+    <p class="chapter-desc">버전 관리의 핵심만 빠르게 익힙니다. 자금일보 프로젝트를 GitHub에 올리는 과정을 단계별로 실습합니다.</p>
+    <div class="chapter-divider"></div>
+  </div>
+
+  <div class="section">
+    <h3>1. Git이란? — 코드의 타임머신</h3>
+    <p>Git은 파일의 변경 이력을 저장하는 도구입니다.<br>
+    "언제, 누가, 무엇을, 왜 바꿨는지" 기록하고 언제든 되돌릴 수 있습니다.</p>
+    <table>
+      <tr><th>개념</th><th>비유</th><th>명령어</th></tr>
+      <tr><td>Repository (저장소)</td><td>프로젝트 폴더 전체</td><td><code>git init</code></td></tr>
+      <tr><td>Commit (커밋)</td><td>저장 포인트 (세이브 파일)</td><td><code>git commit</code></td></tr>
+      <tr><td>Branch (브랜치)</td><td>평행 세계 (복사본)</td><td><code>git branch</code></td></tr>
+      <tr><td>Push (푸시)</td><td>GitHub에 업로드</td><td><code>git push</code></td></tr>
+      <tr><td>Pull (풀)</td><td>GitHub에서 다운로드</td><td><code>git pull</code></td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h3>2. 첫 번째 커밋 — 자금일보 프로젝트 시작</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">Terminal (PowerShell / Git Bash)</span></div>
+      <pre><span class="cm"># 1. 프로젝트 폴더로 이동</span>
+cd C:\workspace\jafm-electron
+
+<span class="cm"># 2. Git 저장소 초기화</span>
+git init
+
+<span class="cm"># 3. 사용자 정보 설정 (최초 1회)</span>
+git config --global user.name  <span class="str">"홍길동"</span>
+git config --global user.email <span class="str">"hong@example.com"</span>
+
+<span class="cm"># 4. .gitignore 만들기 (node_modules 제외)</span>
+<span class="cm"># 아래 내용으로 .gitignore 파일 생성</span>
+node_modules/
+dist/
+*.log
+
+<span class="cm"># 5. 모든 파일을 스테이징</span>
+git add .
+
+<span class="cm"># 6. 커밋 (저장)</span>
+git commit -m <span class="str">"feat: 자금일보 초기 버전"</span></pre>
+    </div>
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <h4>커밋 메시지 컨벤션</h4>
+        <p>팀에서 많이 쓰는 <strong>Conventional Commits</strong> 형식:<br>
+        <code>feat: 새 기능</code> · <code>fix: 버그 수정</code> · <code>refactor: 리팩토링</code> · <code>docs: 문서</code><br>
+        나중에 변경 이력을 볼 때 한눈에 파악할 수 있습니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>3. GitHub에 올리기</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">GitHub 연결 및 Push</span></div>
+      <pre><span class="cm"># GitHub에서 새 저장소 만든 후</span>
+<span class="cm"># (github.com → New repository → 이름 입력 → Create)</span>
+
+<span class="cm"># 원격 저장소 연결</span>
+git remote add origin https://github.com/username/jafm-electron.git
+
+<span class="cm"># 메인 브랜치 이름을 main으로 설정</span>
+git branch -M main
+
+<span class="cm"># GitHub에 업로드</span>
+git push -u origin main
+<span class="cm"># -u : 이후부터는 git push만 입력해도 됨</span></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>4. 브랜치 — 기능별로 분리해서 작업</h3>
+    <p>새 기능을 개발할 때는 <code>main</code> 브랜치를 건드리지 않고 <strong>별도 브랜치</strong>를 만들어 작업합니다.</p>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">브랜치 워크플로우</span></div>
+      <pre><span class="cm"># 1. 새 브랜치 만들고 전환</span>
+git checkout -b feat/export-pdf
+<span class="cm"># = git branch feat/export-pdf + git checkout feat/export-pdf</span>
+
+<span class="cm"># 2. 작업 후 커밋</span>
+git add src/renderer/export.js
+git commit -m <span class="str">"feat: PDF 내보내기 기능 추가"</span>
+
+<span class="cm"># 3. GitHub에 브랜치 올리기</span>
+git push origin feat/export-pdf
+
+<span class="cm"># 4. GitHub에서 Pull Request → 코드 리뷰 → main에 Merge</span>
+
+<span class="cm"># 5. main 최신 내용 받아오기</span>
+git checkout main
+git pull origin main</pre>
+    </div>
+    <h4>자주 쓰는 Git 명령어 요약</h4>
+    <table>
+      <tr><th>명령어</th><th>설명</th></tr>
+      <tr><td><code>git status</code></td><td>현재 변경된 파일 확인</td></tr>
+      <tr><td><code>git diff</code></td><td>변경 내용 상세 확인</td></tr>
+      <tr><td><code>git log --oneline</code></td><td>커밋 이력 한 줄로 보기</td></tr>
+      <tr><td><code>git stash</code></td><td>작업 중 변경사항 임시 저장</td></tr>
+      <tr><td><code>git checkout -- 파일명</code></td><td>파일 변경 되돌리기</td></tr>
+      <tr><td><code>git reset HEAD~1</code></td><td>마지막 커밋 취소 (파일은 유지)</td></tr>
+    </table>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">실습</div>
+    <h4>자금일보 프로젝트 Git 시작하기</h4>
+    <ol>
+      <li><code>c:\workspace\jafm-electron</code>에 git init 실행</li>
+      <li><code>.gitignore</code> 파일에 <code>node_modules/</code>와 <code>dist/</code> 추가</li>
+      <li>첫 커밋: <code>"feat: 자금일보 초기 버전"</code></li>
+      <li>GitHub에 새 저장소 만들어 push</li>
+    </ol>
+    <div class="hint">힌트: git init → git add . → git commit → git remote add → git push</div>
+  </div>
+</div>
+
+<!-- ======================== CHAPTER 11 ======================== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-phase">Phase 3 — Git · 빌드 · 배포</div>
+    <div class="chapter-num">Chapter 11</div>
+    <h2>Electron 빌드 — 설치 파일 만들기</h2>
+    <p class="chapter-desc">electron-builder로 Windows NSIS 설치 파일(.exe)을 만드는 과정 전체를 실습합니다.</p>
+    <div class="chapter-divider"></div>
+  </div>
+
+  <div class="section">
+    <h3>1. Electron 앱의 배포 흐름</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">빌드 흐름</span></div>
+      <pre>소스코드 (src/)
+    ↓  electron-builder
+패키징 (app.asar + Electron 런타임)
+    ↓
+설치 파일 (dist/자금일보 Setup 1.0.0.exe)
+    ↓
+사용자 PC에 설치 → 실행</pre>
+    </div>
+    <p>Electron 앱은 Node.js + Chromium을 <strong>함께 패키징</strong>하므로 설치 파일이 큽니다 (보통 60~100MB).<br>
+    사용자는 Node.js를 따로 설치할 필요가 없습니다.</p>
+  </div>
+
+  <div class="section">
+    <h3>2. package.json 설정</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">package.json — build 섹션</span></div>
+      <pre>{
+  <span class="str">"name"</span>: <span class="str">"jafm-electron"</span>,
+  <span class="str">"version"</span>: <span class="str">"1.0.0"</span>,
+  <span class="str">"description"</span>: <span class="str">"자금일보 관리 시스템"</span>,
+  <span class="str">"main"</span>: <span class="str">"src/main.js"</span>,
+  <span class="str">"scripts"</span>: {
+    <span class="str">"start"</span>: <span class="str">"electron ."</span>,
+    <span class="str">"build"</span>: <span class="str">"electron-builder"</span>,
+    <span class="str">"build:win"</span>: <span class="str">"electron-builder --win"</span>
+  },
+  <span class="str">"build"</span>: {
+    <span class="str">"appId"</span>: <span class="str">"com.mycompany.jafm"</span>,
+    <span class="str">"productName"</span>: <span class="str">"자금일보"</span>,
+    <span class="str">"win"</span>: {
+      <span class="str">"target"</span>: <span class="str">"nsis"</span>,
+      <span class="str">"icon"</span>: <span class="str">"assets/icon.ico"</span>
+    },
+    <span class="str">"nsis"</span>: {
+      <span class="str">"oneClick"</span>: <span class="kw">false</span>,
+      <span class="str">"allowToChangeInstallationDirectory"</span>: <span class="kw">true</span>,
+      <span class="str">"installerLanguages"</span>: [<span class="str">"ko-KR"</span>]
+    },
+    <span class="str">"files"</span>: [
+      <span class="str">"src/**/*"</span>,
+      <span class="str">"package.json"</span>
+    ]
+  }
+}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>3. 빌드 실행</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">Terminal</span></div>
+      <pre><span class="cm"># electron-builder 설치 (개발 의존성)</span>
+npm install --save-dev electron-builder
+
+<span class="cm"># Windows 설치 파일 빌드</span>
+npm run build:win
+
+<span class="cm"># 완료 후 dist/ 폴더 확인</span>
+<span class="cm"># dist/자금일보 Setup 1.0.0.exe  ← 배포용 설치 파일</span>
+<span class="cm"># dist/win-unpacked/             ← 설치 없이 바로 실행 가능</span></pre>
+    </div>
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <h4>아이콘 파일 준비</h4>
+        <p>Windows 빌드에는 <code>.ico</code> 형식 아이콘이 필요합니다.<br>
+        256×256 이상 PNG를 <code>assets/icon.ico</code>로 변환해 두세요.<br>
+        온라인 변환: convertio.co / icoconvert.com</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>4. 버전 관리 — CHANGELOG</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">버전 업할 때</span></div>
+      <pre><span class="cm"># package.json version 수정 후</span>
+npm version patch   <span class="cm"># 1.0.0 → 1.0.1 (버그 수정)</span>
+npm version minor   <span class="cm"># 1.0.0 → 1.1.0 (기능 추가)</span>
+npm version major   <span class="cm"># 1.0.0 → 2.0.0 (하위 호환 깨짐)</span>
+
+<span class="cm"># 빌드 → dist/자금일보 Setup 1.0.1.exe 생성</span>
+npm run build:win</pre>
+    </div>
+    <h4>자동 업데이트 (선택사항)</h4>
+    <p>electron-updater 라이브러리를 쓰면 앱이 실행될 때 새 버전을 자동으로 감지하고 다운로드합니다.<br>
+    GitHub Releases에 설치 파일을 올려두면 됩니다.</p>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">실습</div>
+    <h4>자금일보 설치 파일 만들기</h4>
+    <ol>
+      <li><code>package.json</code>에 <code>build</code> 설정 추가</li>
+      <li><code>npm install --save-dev electron-builder</code></li>
+      <li><code>npm run build:win</code> 실행</li>
+      <li><code>dist/</code> 폴더에서 <code>.exe</code> 파일 확인 후 설치 테스트</li>
+    </ol>
+    <div class="hint">힌트: 아이콘 없으면 build.win.icon 항목 제거하고 빌드해도 됩니다</div>
+  </div>
+</div>
+
+<!-- ======================== CHAPTER 12 ======================== -->
+<div class="chapter">
+  <div class="chapter-header">
+    <div class="chapter-phase">Phase 3 — Git · 빌드 · 배포</div>
+    <div class="chapter-num">Chapter 12</div>
+    <h2>GitHub Actions — 자동 빌드 · 배포</h2>
+    <p class="chapter-desc">코드를 push하면 GitHub이 자동으로 Windows 설치 파일을 만들어주는 CI/CD 파이프라인을 구축합니다.</p>
+    <div class="chapter-divider"></div>
+  </div>
+
+  <div class="section">
+    <h3>1. CI/CD란?</h3>
+    <table>
+      <tr><th>용어</th><th>뜻</th><th>자금일보에서</th></tr>
+      <tr><td>CI (Continuous Integration)</td><td>코드 변경 시 자동 검증</td><td>push하면 빌드 테스트 자동 실행</td></tr>
+      <tr><td>CD (Continuous Delivery)</td><td>자동으로 배포 가능한 상태 유지</td><td>태그 생성 시 .exe 자동 생성</td></tr>
+    </table>
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <h4>GitHub Actions는 무료</h4>
+        <p>Public 저장소는 무제한 무료, Private 저장소는 월 2,000분 무료입니다.<br>
+        Electron 빌드는 보통 3~5분 소요됩니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>2. 워크플로우 파일 작성</h3>
+    <p>GitHub Actions는 <code>.github/workflows/</code> 폴더에 YAML 파일로 정의합니다.</p>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">.github/workflows/build.yml</span></div>
+      <pre><span class="kw">name:</span> Build Electron App
+
+<span class="kw">on:</span>
+  <span class="kw">push:</span>
+    <span class="kw">tags:</span>
+      - <span class="str">'v*'</span>           <span class="cm"># v1.0.0 같은 태그 push할 때만 실행</span>
+
+<span class="kw">jobs:</span>
+  <span class="kw">build-windows:</span>
+    <span class="kw">runs-on:</span> windows-latest   <span class="cm"># Windows 환경에서 실행</span>
+
+    <span class="kw">steps:</span>
+      <span class="cm"># 1. 코드 체크아웃</span>
+      - <span class="kw">uses:</span> actions/checkout@v4
+
+      <span class="cm"># 2. Node.js 설치</span>
+      - <span class="kw">name:</span> Setup Node.js
+        <span class="kw">uses:</span> actions/setup-node@v4
+        <span class="kw">with:</span>
+          <span class="kw">node-version:</span> <span class="str">'20'</span>
+
+      <span class="cm"># 3. 의존성 설치</span>
+      - <span class="kw">name:</span> Install dependencies
+        <span class="kw">run:</span> npm ci
+
+      <span class="cm"># 4. 빌드</span>
+      - <span class="kw">name:</span> Build Windows installer
+        <span class="kw">run:</span> npm run build:win
+
+      <span class="cm"># 5. 결과물을 GitHub Releases에 업로드</span>
+      - <span class="kw">name:</span> Upload to GitHub Releases
+        <span class="kw">uses:</span> softprops/action-gh-release@v2
+        <span class="kw">with:</span>
+          <span class="kw">files:</span> dist/*.exe
+        <span class="kw">env:</span>
+          <span class="kw">GITHUB_TOKEN:</span> ${{ secrets.GITHUB_TOKEN }}</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>3. 배포 실행 흐름</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">배포 순서</span></div>
+      <pre><span class="cm"># 1. 코드 수정 후 커밋</span>
+git add .
+git commit -m <span class="str">"feat: 보고서 PDF 기능 추가"</span>
+
+<span class="cm"># 2. package.json 버전 올리기</span>
+npm version minor    <span class="cm"># 1.0.0 → 1.1.0</span>
+
+<span class="cm"># 3. 태그와 함께 push</span>
+git push origin main --tags
+<span class="cm"># ↑ 이 순간 GitHub Actions가 자동으로 시작!</span>
+
+<span class="cm"># 4. GitHub → Actions 탭에서 진행 상황 확인</span>
+<span class="cm"># 5. 완료 후 Releases 탭에서 .exe 다운로드 가능</span></pre>
+    </div>
+    <div class="callout good">
+      <div class="callout-icon">✅</div>
+      <div class="callout-body">
+        <h4>완성된 배포 파이프라인</h4>
+        <p>이제 <code>git push</code> + 태그 하나로 Windows 설치 파일이 자동으로 만들어집니다.<br>
+        친구에게 배포할 때 <strong>GitHub Releases 링크</strong>만 공유하면 됩니다.<br>
+        빌드 환경이 없는 PC에서도 코드만 push하면 설치 파일이 생깁니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>4. 전체 개발 워크플로우 정리</h3>
+    <div class="code-wrap">
+      <div class="code-label"><span class="lang">일상적인 개발 사이클</span></div>
+      <pre><span class="cm">┌─────────────────────────────────────────────────┐</span>
+<span class="cm">│  기능 개발                                        │</span>
+<span class="cm">│  git checkout -b feat/새기능                      │</span>
+<span class="cm">│  → 코드 작성 → git commit                         │</span>
+<span class="cm">│  → git push → GitHub PR 생성 → 리뷰 → Merge      │</span>
+<span class="cm">│                                                   │</span>
+<span class="cm">│  배포                                             │</span>
+<span class="cm">│  npm version patch/minor/major                    │</span>
+<span class="cm">│  → git push --tags                                │</span>
+<span class="cm">│  → GitHub Actions 자동 빌드                       │</span>
+<span class="cm">│  → Releases에 .exe 자동 업로드                    │</span>
+<span class="cm">└─────────────────────────────────────────────────┘</span></pre>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-title">실습</div>
+    <h4>자동 배포 파이프라인 구축</h4>
+    <ol>
+      <li><code>.github/workflows/build.yml</code> 파일 생성</li>
+      <li>GitHub 저장소에 push</li>
+      <li><code>npm version patch</code> 후 <code>git push --tags</code></li>
+      <li>GitHub Actions 탭에서 빌드 진행 확인</li>
+      <li>Releases 탭에서 <code>.exe</code> 다운로드 확인</li>
+    </ol>
+    <div class="hint">힌트: GITHUB_TOKEN은 GitHub이 자동으로 제공하므로 별도 설정 불필요</div>
+  </div>
+
+  <div class="callout good" style="margin-top:48px;">
+    <div class="callout-icon">🎉</div>
+    <div class="callout-body">
+      <h4>교재 완료!</h4>
+      <p>12회차 커리큘럼을 마쳤습니다.<br>
+      <strong>Phase 1</strong>: JS 핵심 문법 (변수·배열·비동기·DOM)<br>
+      <strong>Phase 2</strong>: React 원리 (컴포넌트·JSX·Hook)<br>
+      <strong>Phase 3</strong>: Git · Electron 빌드 · GitHub Actions 자동 배포<br><br>
+      이제 자금일보에 새 기능을 추가하고, 버전 태그를 달아 배포까지 직접 해보세요!</p>
+    </div>
+  </div>
+</div>
+
+<button class="float-btn no-print" onclick="window.print()">🖨️ PDF로 저장</button>
+
+</body>
+</html>

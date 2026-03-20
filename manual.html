@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>자금일보 관리 시스템 - 사용설명서</title>
+<style>
+  :root {
+    --primary: #1a4fa0;
+    --primary-light: #e8f0fb;
+    --accent: #c8321a;
+    --success: #0f6e3a;
+    --success-light: #e6f5ec;
+    --bg: #f4f6fa;
+    --card: #ffffff;
+    --border: #dde3ed;
+    --text: #1a1f2e;
+    --text-muted: #6b7489;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+    font-size: 16px;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* 헤더 */
+  .manual-header {
+    background: var(--primary);
+    color: #fff;
+    padding: 36px 48px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .manual-header .icon { font-size: 48px; }
+  .manual-header h1 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+  .manual-header p { font-size: 15px; opacity: .8; }
+  .version-badge {
+    margin-left: auto;
+    background: rgba(255,255,255,.2);
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* 목차 */
+  .toc-wrap {
+    background: var(--primary-light);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 8px 8px 0;
+    padding: 20px 28px;
+    margin: 32px 48px;
+  }
+  .toc-wrap h2 { font-size: 16px; color: var(--primary); margin-bottom: 12px; }
+  .toc-wrap ol { padding-left: 20px; }
+  .toc-wrap li { margin-bottom: 6px; }
+  .toc-wrap a { color: var(--primary); text-decoration: none; font-size: 15px; }
+  .toc-wrap a:hover { text-decoration: underline; }
+
+  /* 본문 */
+  .content { max-width: 900px; margin: 0 auto; padding: 0 48px 60px; }
+
+  /* 섹션 */
+  .section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 28px;
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--primary-light);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title .num {
+    background: var(--primary);
+    color: #fff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 20px 0 10px;
+  }
+
+  p { margin-bottom: 12px; color: var(--text); }
+
+  /* 정보 박스 */
+  .info-box {
+    background: var(--primary-light);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-size: 15px;
+    color: var(--primary);
+  }
+  .warn-box {
+    background: #fff8e1;
+    border-left: 4px solid #f59e0b;
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-size: 15px;
+    color: #78500a;
+  }
+  .success-box {
+    background: var(--success-light);
+    border-left: 4px solid var(--success);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-size: 15px;
+    color: var(--success);
+  }
+
+  /* 단계 목록 */
+  .steps { list-style: none; padding: 0; }
+  .steps li {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+  .step-num {
+    background: var(--primary);
+    color: #fff;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-body { flex: 1; }
+  .step-body strong { color: var(--primary); }
+
+  /* 일반 목록 */
+  ul.desc { padding-left: 20px; margin-bottom: 12px; }
+  ul.desc li { margin-bottom: 6px; }
+
+  /* 테이블 */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 15px;
+  }
+  th {
+    background: var(--primary);
+    color: #fff;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: var(--bg); }
+
+  /* 배지 */
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .badge-blue  { background: var(--primary-light); color: var(--primary); }
+  .badge-green { background: var(--success-light); color: var(--success); }
+  .badge-red   { background: #fdecea; color: var(--accent); }
+
+  /* 단축키 */
+  kbd {
+    background: #eef1f7;
+    border: 1px solid #c0c8d8;
+    border-bottom: 2px solid #b0b8cc;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-family: monospace;
+    font-size: 14px;
+  }
+
+  /* 탭 설명 그리드 */
+  .tab-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .tab-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    background: var(--bg);
+  }
+  .tab-card .tab-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+  .tab-card p { font-size: 14px; color: var(--text-muted); margin: 0; }
+
+  /* 구분선 */
+  hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  /* 푸터 */
+  .manual-footer {
+    text-align: center;
+    padding: 28px;
+    font-size: 14px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+  }
+
+  @media (max-width: 680px) {
+    .manual-header { padding: 24px 20px; flex-wrap: wrap; }
+    .version-badge { margin-left: 0; }
+    .content { padding: 0 16px 40px; }
+    .toc-wrap { margin: 20px 16px; }
+    .tab-grid { grid-template-columns: 1fr; }
+  }
+
+  @media print {
+    .manual-header { background: #333 !important; -webkit-print-color-adjust: exact; }
+    .section { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<header class="manual-header">
+  <div class="icon">💰</div>
+  <div>
+    <h1>자금일보 관리 시스템</h1>
+    <p>소규모 기업용 자금 입출금 관리 프로그램 사용설명서</p>
+  </div>
+  <div class="version-badge">v1.0.0</div>
+</header>
+
+<!-- 목차 -->
+<div class="toc-wrap" style="max-width:900px;margin:32px auto;">
+  <h2>📋 목차</h2>
+  <ol>
+    <li><a href="#sec1">프로그램 소개</a></li>
+    <li><a href="#sec2">처음 시작하기 (초기 설정)</a></li>
+    <li><a href="#sec3">자금 입력 — 입출금 내역 등록</a></li>
+    <li><a href="#sec4">보고서 — 주간 자금 현황 조회</a></li>
+    <li><a href="#sec5">내보내기 — 엑셀 · Word 저장 &amp; 은행 파일 가져오기</a></li>
+    <li><a href="#sec6">계좌 설정 &amp; 결재란 설정</a></li>
+    <li><a href="#sec7">데이터 백업 &amp; 복원</a></li>
+    <li><a href="#sec8">메뉴 &amp; 단축키</a></li>
+    <li><a href="#sec9">자주 묻는 질문 (FAQ)</a></li>
+  </ol>
+</div>
+
+<div class="content">
+
+<!-- 1. 프로그램 소개 -->
+<section class="section" id="sec1">
+  <div class="section-title"><span class="num">1</span> 프로그램 소개</div>
+  <p>
+    <strong>자금일보 관리 시스템</strong>은 소규모 기업의 일별 자금 입출금을 간편하게 관리하는 로컬 설치형 프로그램입니다.
+    인터넷 연결 없이 PC에서 단독으로 실행되며, 모든 데이터는 내 컴퓨터에만 저장됩니다.
+  </p>
+
+  <div class="tab-grid">
+    <div class="tab-card">
+      <div class="tab-name">📋 자금 입력</div>
+      <p>날짜·계좌·금액·거래처를 입력하여 입출금 내역을 등록하고 조회합니다.</p>
+    </div>
+    <div class="tab-card">
+      <div class="tab-name">📊 보고서</div>
+      <p>선택한 기간의 계좌별 자금 흐름을 보고서 형태로 확인하고, 인쇄 또는 Word 파일로 저장합니다.</p>
+    </div>
+    <div class="tab-card">
+      <div class="tab-name">💾 내보내기</div>
+      <p>엑셀 파일로 내보내거나, 은행 거래내역 파일을 자동으로 불러옵니다. JSON 백업·복원도 이곳에서 합니다.</p>
+    </div>
+    <div class="tab-card">
+      <div class="tab-name">⚙️ 설정</div>
+      <p>계좌 이름·번호·기준잔액을 관리하고, 보고서 결재란 항목 이름을 설정합니다.</p>
+    </div>
+  </div>
+
+  <h3>주요 특징</h3>
+  <ul class="desc">
+    <li>계좌 추가·삭제·수정 가능 — 회사 상황에 맞게 자유롭게 구성</li>
+    <li>원화(₩) 및 외화($) 계좌 동시 관리</li>
+    <li>마이너스 잔액 시 <span style="color:#c8321a;font-weight:700;">⚠️ 경고 표시</span> 및 빨간 글씨로 시각적 구분</li>
+    <li>기업은행·농협·우리은행·국민은행·신한은행 거래내역 파일 자동 인식</li>
+    <li>엑셀(.xls) · Word(.doc) 보고서 내보내기</li>
+    <li>JSON 백업으로 계좌설정·잔액·결재란·거래내역 전체 보관 및 복원</li>
+  </ul>
+</section>
+
+<!-- 2. 처음 시작하기 -->
+<section class="section" id="sec2">
+  <div class="section-title"><span class="num">2</span> 처음 시작하기 (초기 설정)</div>
+  <p>프로그램을 처음 설치한 후 아래 순서로 설정하면 바로 사용할 수 있습니다.</p>
+
+  <ul class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">
+        상단 탭에서 <strong>⚙️ 설정</strong>을 클릭합니다.
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>계좌 설정</strong> 화면에서 계좌 이름·번호를 확인하고, 각 계좌의 <strong>기준 잔액</strong>에 현재 실제 잔액을 입력합니다.<br>
+        <span style="font-size:14px;color:var(--text-muted);">예) 기업은행 주계좌에 5,000만원이 있다면 50000000 입력 (콤마 없이 숫자만)</span><br>
+        <span style="font-size:14px;color:var(--text-muted);">기준 잔액 옆 <strong>현재잔액</strong>은 기준잔액 + 입금 − 출금으로 자동 계산되어 표시됩니다.</span>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body">
+        계좌 목록이 회사 상황과 다르면 <strong>➕ 계좌 추가</strong> 버튼으로 추가하거나 🗑️ 버튼으로 삭제합니다.
+      </div>
+    </li>
+    <li>
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <strong>✅ 저장</strong> 버튼을 클릭합니다.
+      </div>
+    </li>
+  </ul>
+
+  <div class="info-box">
+    💡 기준잔액은 이후 입출금 내역의 계산 기준이 됩니다. 잘못 입력했다면 ⚙️ 설정 탭에서 언제든지 수정할 수 있습니다.
+  </div>
+</section>
+
+<!-- 3. 자금 입력 -->
+<section class="section" id="sec3">
+  <div class="section-title"><span class="num">3</span> 자금 입력 — 입출금 내역 등록</div>
+
+  <h3>입출금 내역 입력</h3>
+  <ul class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">
+        상단 탭에서 <strong>📋 자금 입력</strong>을 클릭합니다.
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>입출금 내역 입력</strong> 카드에서 아래 항목을 입력합니다.
+        <table style="margin-top:10px;">
+          <thead><tr><th>항목</th><th>설명</th><th>필수</th></tr></thead>
+          <tbody>
+            <tr><td>날짜</td><td>거래 발생일</td><td><span class="badge badge-red">필수</span></td></tr>
+            <tr><td>계좌 구분</td><td>거래가 일어난 계좌 선택 (설정에서 추가한 계좌 포함)</td><td><span class="badge badge-red">필수</span></td></tr>
+            <tr><td>입출금 구분</td><td>💙 입금 또는 ❤️ 출금 선택</td><td><span class="badge badge-red">필수</span></td></tr>
+            <tr><td>금액</td><td>숫자만 입력 (콤마 자동 표시)</td><td><span class="badge badge-red">필수</span></td></tr>
+            <tr><td>거래처 / 내용</td><td>거래처명 또는 거래 내용</td><td><span class="badge badge-red">필수</span></td></tr>
+            <tr><td>비고</td><td>추가 메모 (선택)</td><td><span class="badge badge-blue">선택</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>✅ 저장</strong> 버튼을 클릭합니다. 저장 즉시 하단 내역 목록에 반영됩니다.
+      </div>
+    </li>
+  </ul>
+
+  <h3>화면 상단 요약 정보</h3>
+  <ul class="desc">
+    <li><strong>💼 가용자금 합계</strong> — 모든 원화·현금 계좌의 현재 잔액 합계 (외화 USD는 별도 표시)</li>
+    <li><strong>계좌 카드</strong> — 각 계좌별 현재 잔액을 한눈에 확인. 잔액 마이너스 시 빨간 테두리 + ⚠️ 경고</li>
+  </ul>
+
+  <h3>내역 조회 및 필터</h3>
+  <p>
+    <strong>📋 입출금 내역 목록</strong> 카드에서 기간·구분·계좌 필터를 설정하면 원하는 내역만 볼 수 있습니다.
+    <strong>전체보기</strong> 버튼을 클릭하면 필터가 해제됩니다.
+    현재 보이는 목록만 엑셀로 내보내려면 <strong>📥 현재 목록 엑셀</strong> 버튼을 사용하세요.
+  </p>
+
+  <h3>내역 삭제</h3>
+  <p>삭제하려는 내역의 오른쪽 <strong>삭제</strong> 버튼을 클릭합니다. 삭제 후에는 복구되지 않으니 주의하세요.</p>
+
+  <div class="warn-box">
+    ⚠️ 삭제된 내역은 복구할 수 없습니다. 중요한 데이터는 미리 JSON 백업을 해두세요.
+  </div>
+</section>
+
+<!-- 4. 보고서 -->
+<section class="section" id="sec4">
+  <div class="section-title"><span class="num">4</span> 보고서 — 주간 자금 현황 조회</div>
+
+  <ul class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">상단 탭에서 <strong>📊 보고서</strong>를 클릭합니다.</div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>보고 기간</strong> 시작일과 종료일을 선택합니다. (주 단위 조회 권장, 기본값: 이번 주)
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>보고서 양식</strong>을 선택합니다.
+        <ul class="desc" style="margin-top:8px;">
+          <li><strong>공식 보고서</strong> — 계좌별 잔액 현황 + 입·출금 통합 내역</li>
+          <li><strong>추가 양식</strong> — 계좌별 잔액 현황 + 입금 내역 / 출금 내역 분리</li>
+        </ul>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <strong>🔍 보고서 생성</strong> 버튼을 클릭합니다.
+      </div>
+    </li>
+    <li>
+      <div class="step-num">5</div>
+      <div class="step-body">
+        필요에 따라 버튼을 선택합니다:
+        <ul class="desc" style="margin-top:8px;">
+          <li><strong>🖨️ 인쇄 미리보기</strong> — 인쇄 다이얼로그 열기 (프린터 출력 또는 PDF 저장)</li>
+          <li><strong>📄 Word 저장</strong> — Word 호환 .doc 파일로 저장</li>
+        </ul>
+      </div>
+    </li>
+  </ul>
+
+  <div class="info-box">
+    💡 보고서에는 결재란(서명 공간)이 포함됩니다. 결재란 항목 이름(담당·이사 등)은 ⚙️ 설정 탭 → 결재란 설정에서 변경할 수 있습니다.<br>
+    마이너스 금액은 <span style="color:#c8321a;font-weight:700;">▼ 빨간색</span>으로 표시됩니다.
+  </div>
+</section>
+
+<!-- 5. 내보내기 -->
+<section class="section" id="sec5">
+  <div class="section-title"><span class="num">5</span> 내보내기 — 엑셀 · Word 저장 &amp; 은행 파일 가져오기</div>
+
+  <h3>💾 엑셀 파일 다운로드</h3>
+  <ul class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">상단 탭에서 <strong>💾 내보내기</strong>를 클릭합니다.</div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body"><strong>기간</strong>과 <strong>계좌</strong>를 선택합니다. (계좌 미선택 시 전체 계좌)</div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>📥 엑셀 다운로드</strong> — 선택 기간의 자금일보 양식 엑셀(.xls) 저장<br>
+        <strong>📦 전체 데이터 다운로드</strong> — 모든 기간의 데이터를 한 번에 저장<br>
+        <span style="font-size:14px;color:var(--text-muted);">엑셀 파일은 입출금내역 시트 + 계좌잔액현황 시트 두 장으로 구성됩니다. 헤더는 파란색으로 표시됩니다.</span>
+      </div>
+    </li>
+  </ul>
+
+  <div class="info-box">
+    📋 자금 입력 탭에서 필터를 적용한 후 <strong>📥 현재 목록 엑셀</strong> 버튼을 누르면 현재 보이는 목록만 엑셀로 저장할 수 있습니다.
+  </div>
+
+  <hr>
+
+  <h3>📄 Word 보고서 저장</h3>
+  <p>
+    보고서 탭에서 기간과 양식을 선택 후 <strong>보고서 생성</strong>을 클릭한 다음 <strong>📄 Word 저장</strong> 버튼을 누릅니다.
+    Word(.doc) 파일은 Microsoft Word에서 열 수 있으며, 표 서식이 그대로 유지됩니다.
+  </p>
+
+  <hr>
+
+  <h3>🏦 은행 거래내역 가져오기</h3>
+  <p>은행 앱/인터넷뱅킹에서 내려받은 거래내역 파일(.xlsx, .xls, .csv)을 자동으로 불러옵니다.</p>
+
+  <table>
+    <thead><tr><th>은행</th><th>내보내기 경로</th></tr></thead>
+    <tbody>
+      <tr><td><strong>기업은행</strong></td><td>거래내역 조회 → 엑셀 저장</td></tr>
+      <tr><td><strong>농협은행</strong></td><td>거래내역 조회 → 내보내기 → 엑셀</td></tr>
+      <tr><td><strong>우리은행</strong></td><td>거래내역 → 파일저장 (Excel)</td></tr>
+      <tr><td><strong>국민은행</strong></td><td>거래내역 조회 → 엑셀 다운로드</td></tr>
+      <tr><td><strong>신한은행</strong></td><td>거래내역 조회 → 내보내기</td></tr>
+      <tr><td><strong>기타</strong></td><td>자동 감지 선택 후 파일 업로드</td></tr>
+    </tbody>
+  </table>
+
+  <ul class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body"><strong>은행 선택</strong> — 파일을 받은 은행을 선택합니다. (잘 모르면 <em>자동 감지</em> 선택)</div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body"><strong>계좌 구분</strong> — 가져올 내역을 어느 계좌로 등록할지 선택합니다.</div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body"><strong>📂 파일 선택</strong> 버튼을 클릭하여 파일을 선택합니다.</div>
+    </li>
+    <li>
+      <div class="step-num">4</div>
+      <div class="step-body">
+        미리보기 화면에서 가져올 항목을 확인합니다. 불필요한 항목은 <strong>포함</strong> 체크를 해제합니다.
+      </div>
+    </li>
+    <li>
+      <div class="step-num">5</div>
+      <div class="step-body"><strong>✅ 선택 항목 가져오기</strong>를 클릭하면 자금 입력 탭에 자동 등록됩니다. 중복 내역은 자동으로 제외됩니다.</div>
+    </li>
+  </ul>
+
+  <div class="info-box">
+    📋 <strong>은행별 엑셀 컬럼 구조 보기</strong> 버튼을 클릭하면 각 은행 파일의 컬럼 구조와 내보내기 방법을 자세히 확인할 수 있습니다.
+  </div>
+</section>
+
+<!-- 6. 계좌 설정 & 결재란 설정 -->
+<section class="section" id="sec6">
+  <div class="section-title"><span class="num">6</span> 계좌 설정 &amp; 결재란 설정</div>
+
+  <h3>⚙️ 계좌 설정</h3>
+  <p>⚙️ 설정 탭에서 계좌 이름·번호·기준잔액을 자유롭게 편집할 수 있습니다.</p>
+
+  <table>
+    <thead><tr><th>항목</th><th>설명</th></tr></thead>
+    <tbody>
+      <tr><td><strong>계좌 이름</strong></td><td>화면과 보고서에 표시되는 이름. 자유롭게 수정 가능</td></tr>
+      <tr><td><strong>계좌번호</strong></td><td>참고용. 보고서에 표시됨. 없으면 빈칸</td></tr>
+      <tr><td><strong>종류</strong></td><td>원화(₩) / 외화($) / 현금 중 선택</td></tr>
+      <tr><td><strong>기준 잔액 ⓘ</strong></td><td>거래 입력 전 실제 잔액. 이후 입출금이 여기에 더해지거나 빠짐</td></tr>
+      <tr><td><strong>현재잔액 ⓘ</strong></td><td>기준잔액 + 모든 입금 − 모든 출금. 자동 계산 (수정 불가)</td></tr>
+    </tbody>
+  </table>
+
+  <ul class="desc">
+    <li><strong>➕ 계좌 추가</strong> — 새 계좌를 추가합니다. 추가 후 반드시 <strong>✅ 저장</strong> 버튼을 눌러야 반영됩니다.</li>
+    <li><strong>🗑️ 삭제</strong> — 거래내역이 없는 계좌만 삭제 가능합니다. 삭제 후 <strong>✅ 저장</strong>을 눌러야 반영됩니다.</li>
+    <li><strong>🔄 되돌리기</strong> — 저장하지 않은 변경사항을 원래대로 복원합니다.</li>
+  </ul>
+
+  <div class="warn-box">
+    ⚠️ 현재잔액이 마이너스인 계좌는 빨간 테두리와 ⚠️ 경고가 표시됩니다. 기준잔액을 확인하세요.
+  </div>
+
+  <hr>
+
+  <h3>📝 결재란 설정</h3>
+  <p>보고서 상단 결재란에 표시될 항목 이름(예: 담당, 이사)을 변경합니다.</p>
+  <ul class="steps">
+    <li><div class="step-num">1</div><div class="step-body">⚙️ 설정 탭 → <strong>결재란 설정</strong> 카드에서 항목 1, 항목 2 이름을 입력합니다.</div></li>
+    <li><div class="step-num">2</div><div class="step-body"><strong>✅ 결재란 저장</strong> 버튼을 클릭합니다.</div></li>
+  </ul>
+</section>
+
+<!-- 7. 백업 & 복원 -->
+<section class="section" id="sec7">
+  <div class="section-title"><span class="num">7</span> 데이터 백업 &amp; 복원</div>
+  <p>데이터는 PC에 자동 저장되지만, 정기적으로 백업해두면 PC 교체나 실수로 삭제했을 때 안전합니다.</p>
+
+  <h3>💾 JSON 백업 (권장)</h3>
+  <p>백업 파일(v2 형식)에는 <strong>거래내역 + 계좌설정 + 잔액 + 결재란 이름</strong>이 모두 포함됩니다.</p>
+  <ul class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">
+        메뉴 <strong>파일 → 데이터 백업 (JSON)</strong> 또는 <kbd>Ctrl</kbd> + <kbd>S</kbd><br>
+        또는: 💾 내보내기 탭 → 데이터 관리 → <strong>💾 JSON 백업</strong>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body">저장 위치를 선택하고 파일을 저장합니다.</div>
+    </li>
+  </ul>
+
+  <h3>📂 JSON 복원</h3>
+  <ul class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">
+        메뉴 <strong>파일 → 백업 파일 복원</strong> 또는<br>
+        💾 내보내기 탭 → 데이터 관리 → <strong>📂 JSON 복원</strong>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body">백업해두었던 .json 파일을 선택합니다.</div>
+    </li>
+  </ul>
+
+  <div class="warn-box">
+    ⚠️ v2 형식(최신) 백업 복원 시 현재 데이터 전체가 백업 내용으로 덮어써집니다. 복원 전에 현재 데이터를 먼저 백업해두세요.<br>
+    구버전 백업(거래내역만 있는 배열 형식)은 기존 내역과 병합됩니다.
+  </div>
+
+  <h3>🗑️ 전체 데이터 삭제</h3>
+  <p>
+    💾 내보내기 탭 → 데이터 관리 → <strong>🗑️ 전체 삭제</strong> 버튼을 누르면 거래내역·계좌설정·잔액·결재란 이름이 모두 삭제됩니다.
+    2회 확인 후 삭제가 진행되며, <strong>삭제 후에는 복구가 불가능합니다.</strong>
+  </p>
+
+  <h3>데이터 저장 위치 확인</h3>
+  <p>
+    메뉴 <strong>도움말 → 데이터 저장 위치 열기</strong>를 클릭하면 실제 데이터 파일이 저장된 폴더가 열립니다.
+  </p>
+
+  <div class="success-box">
+    ✅ 정기 백업 권장: 월 1회 이상 JSON 백업 파일을 USB 또는 클라우드에 보관하세요.
+  </div>
+</section>
+
+<!-- 8. 메뉴 & 단축키 -->
+<section class="section" id="sec8">
+  <div class="section-title"><span class="num">8</span> 메뉴 &amp; 단축키</div>
+
+  <table>
+    <thead><tr><th>메뉴</th><th>기능</th><th>단축키</th></tr></thead>
+    <tbody>
+      <tr><td>파일 → 데이터 백업 (JSON)</td><td>전체 데이터를 JSON 파일로 저장</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td></tr>
+      <tr><td>파일 → 백업 파일 복원</td><td>JSON 백업 파일로 데이터 복원</td><td>—</td></tr>
+      <tr><td>파일 → 종료</td><td>프로그램 종료</td><td><kbd>Alt</kbd>+<kbd>F4</kbd></td></tr>
+      <tr><td>보기 → 새로고침</td><td>화면 새로고침</td><td><kbd>F5</kbd></td></tr>
+      <tr><td>보기 → 확대</td><td>화면 확대</td><td><kbd>Ctrl</kbd>+<kbd>+</kbd></td></tr>
+      <tr><td>보기 → 축소</td><td>화면 축소</td><td><kbd>Ctrl</kbd>+<kbd>-</kbd></td></tr>
+      <tr><td>보기 → 기본 크기</td><td>화면 크기 초기화</td><td><kbd>Ctrl</kbd>+<kbd>0</kbd></td></tr>
+      <tr><td>보기 → 전체 화면</td><td>전체 화면 전환</td><td><kbd>F11</kbd></td></tr>
+      <tr><td>도움말 → 사용자 설명서</td><td>이 설명서 열기</td><td>—</td></tr>
+      <tr><td>도움말 → 데이터 저장 위치 열기</td><td>데이터 파일 폴더 열기</td><td>—</td></tr>
+      <tr><td>도움말 → 버전 정보</td><td>프로그램 버전 확인</td><td>—</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 9. FAQ -->
+<section class="section" id="sec9">
+  <div class="section-title"><span class="num">9</span> 자주 묻는 질문 (FAQ)</div>
+
+  <h3>Q. 잔액이 실제와 다르게 표시됩니다.</h3>
+  <p>
+    ⚙️ 설정 탭에서 <strong>기준 잔액</strong>이 정확히 입력되어 있는지 확인하세요.
+    기준잔액을 기준으로 이후 입출금 내역이 더해지거나 빠지기 때문에, 기준값이 맞지 않으면 잔액이 틀립니다.
+    옆에 표시되는 <strong>현재잔액</strong>이 실제 잔액과 일치하는지 확인하세요.
+  </p>
+
+  <hr>
+
+  <h3>Q. 기준잔액과 현재잔액의 차이가 무엇인가요?</h3>
+  <p>
+    <strong>기준 잔액</strong>은 처음 입력한 시작 금액입니다. 직접 수정 가능합니다.<br>
+    <strong>현재잔액</strong>은 기준잔액 + 모든 입금 − 모든 출금으로 자동 계산된 값입니다. 수정할 수 없습니다.<br>
+    가용자금 합계 화면의 잔액은 <strong>현재잔액</strong>을 기준으로 합산됩니다.
+  </p>
+
+  <hr>
+
+  <h3>Q. 프로그램을 삭제하면 데이터도 사라지나요?</h3>
+  <p>
+    데이터는 프로그램과 별도 위치(<strong>사용자 앱 데이터 폴더</strong>)에 저장되므로 프로그램 삭제와 무관합니다.
+    단, 해당 폴더를 직접 삭제하거나 PC를 초기화하면 데이터가 손실되므로 <strong>정기적인 JSON 백업</strong>을 권장합니다.
+  </p>
+
+  <hr>
+
+  <h3>Q. PC를 교체할 때 데이터를 옮기려면?</h3>
+  <ul class="steps">
+    <li><div class="step-num">1</div><div class="step-body">기존 PC: 파일 메뉴 → 데이터 백업(JSON)으로 백업 파일 저장</div></li>
+    <li><div class="step-num">2</div><div class="step-body">새 PC에 프로그램 설치</div></li>
+    <li><div class="step-num">3</div><div class="step-body">파일 메뉴 → 백업 파일 복원으로 백업 파일 불러오기 (계좌설정·잔액·거래내역 모두 복원됨)</div></li>
+  </ul>
+
+  <hr>
+
+  <h3>Q. 전체 삭제 후 계좌가 하나도 없어졌습니다.</h3>
+  <p>
+    전체 삭제는 계좌설정까지 모두 삭제합니다. ⚙️ 설정 탭 → <strong>➕ 계좌 추가</strong>로 계좌를 다시 추가하세요.
+    또는 이전에 저장한 JSON 백업 파일을 복원하면 계좌설정이 그대로 복구됩니다.
+  </p>
+
+  <hr>
+
+  <h3>Q. 은행 파일 가져오기가 실패합니다.</h3>
+  <ul class="desc">
+    <li>올바른 은행을 선택했는지 확인 (또는 <em>자동 감지</em> 시도)</li>
+    <li>파일 형식이 .xlsx, .xls, .csv인지 확인</li>
+    <li>파일이 Excel 등 다른 프로그램에서 열려 있지 않은지 확인 후 닫고 시도</li>
+    <li><strong>📋 은행별 엑셀 컬럼 구조 보기</strong>에서 해당 은행의 컬럼 구조를 확인</li>
+  </ul>
+
+  <hr>
+
+  <h3>Q. 실수로 입력한 내역을 수정하려면?</h3>
+  <p>
+    현재 버전에서는 직접 수정 기능이 없습니다. 잘못된 내역을 <strong>삭제</strong>한 후 올바른 내용으로 다시 입력하세요.
+  </p>
+
+  <hr>
+
+  <h3>Q. 마이너스 잔액이 표시됩니다.</h3>
+  <p>
+    출금 합계가 기준잔액 + 입금 합계를 초과하면 마이너스가 됩니다.
+    계좌 카드에 <span style="color:#c8321a;font-weight:700;">⚠️ 잔액 부족</span> 경고가 표시되고, 금액도 빨간 색으로 표시됩니다.
+    기준잔액이 올바른지 확인하거나, 누락된 입금 내역이 있는지 확인하세요.
+  </p>
+</section>
+
+</div><!-- /content -->
+
+<footer class="manual-footer">
+  자금일보 관리 시스템 v1.0.0 &nbsp;|&nbsp; Copyright © 2026 n2soft &nbsp;|&nbsp; 문의: n2soft
+</footer>
+
+</body>
+</html>

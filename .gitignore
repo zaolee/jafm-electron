@@ -1,0 +1,8 @@
+node_modules/
+dist/
+out/
+assets/xlsx.full.min.js
+*.log
+.DS_Store
+Thumbs.db
+app.js.bak

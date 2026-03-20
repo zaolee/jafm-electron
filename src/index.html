@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Electron 보안: CSP 설정 -->
+<meta http-equiv="Content-Security-Policy"
+  content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+<title>자금일보 관리 시스템</title>
+<!-- xlsx 라이브러리: 로컬 파일 사용 (인터넷 없이 동작) -->
+<script src="../assets/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- 헤더 -->
+<header class="app-header">
+  <div>
+    <span class="logo">💰 자금일보</span>
+    <span class="sub">관리 시스템</span>
+  </div>
+  <div class="header-date" id="todayDate"></div>
+  <button onclick="openManual()" style="margin-left:12px;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.4);color:#fff;border-radius:8px;padding:0 16px;height:40px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">❓ 도움말</button>
+</header>
+
+<!-- 탭 -->
+<nav class="tabs">
+  <button class="tab-btn active" onclick="switchTab('input')" id="tab-input">📋 자금 입력</button>
+  <button class="tab-btn" onclick="switchTab('report')" id="tab-report">📊 보고서</button>
+  <button class="tab-btn" onclick="switchTab('export')" id="tab-export">💾 내보내기</button>
+  <button class="tab-btn" onclick="switchTab('settings')" id="tab-settings">⚙️ 설정</button>
+</nav>
+
+<!-- ==============================
+     탭 1: 자금 입력
+============================== -->
+<div class="page active" id="page-input">
+
+  <!-- 가용자금 합계 -->
+  <div class="total-box">
+    <div class="lbl">💼 가용자금 합계</div>
+    <div class="val" id="totalFund">₩ 0</div>
+  </div>
+
+  <!-- 계좌 잔액 카드 -->
+  <div class="account-grid" id="accountCards"></div>
+
+  <!-- 거래 입력 폼 -->
+  <div class="card">
+    <div class="card-title">➕ 입출금 내역 입력</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>날짜</label>
+        <input type="date" id="f-date">
+      </div>
+      <div class="form-group">
+        <label>계좌 구분</label>
+        <select id="f-account"></select>
+      </div>
+      <div class="form-group">
+        <label>입출금 구분</label>
+        <select id="f-type">
+          <option value="입금">💙 입금</option>
+          <option value="출금">❤️ 출금</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>금액</label>
+        <input type="text" id="f-amount" placeholder="숫자만 입력" oninput="formatAmountInput(this)">
+      </div>
+      <div class="form-group">
+        <label>거래처 / 내용</label>
+        <input type="text" id="f-desc" placeholder="예) 웨딩크라우드">
+      </div>
+      <div class="form-group">
+        <label>비고</label>
+        <input type="text" id="f-note" placeholder="선택사항">
+      </div>
+    </div>
+    <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="addTransaction()">✅ 저장</button>
+      <button class="btn btn-outline" onclick="clearForm()">🔄 초기화</button>
+    </div>
+  </div>
+
+  <!-- 입출금 내역 테이블 -->
+  <div class="card">
+    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>📋 입출금 내역 목록</span>
+      <button class="btn btn-outline" onclick="exportCurrentView()" style="font-size:14px;height:36px;padding:0 14px;border-color:var(--success);color:var(--success);">📥 현재 목록 엑셀</button>
+    </div>
+    <div class="filter-bar">
+      <label>기간:</label>
+      <input type="date" id="filter-from" onchange="renderTransactions()">
+      <span style="color:var(--text-muted)">~</span>
+      <input type="date" id="filter-to" onchange="renderTransactions()">
+      <select id="filter-type" onchange="renderTransactions()" style="height:40px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-size:15px;font-family:inherit;outline:none;cursor:pointer;">
+        <option value="">전체</option>
+        <option value="입금">💙 입금만</option>
+        <option value="출금">❤️ 출금만</option>
+      </select>
+      <select id="filter-account" onchange="renderTransactions()" style="height:40px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-size:15px;font-family:inherit;outline:none;cursor:pointer;">
+        <option value="">전체 계좌</option>
+      </select>
+      <button class="btn btn-sm btn-outline" onclick="clearFilter()">전체보기</button>
+    </div>
+    <div class="table-wrap">
+      <table id="txTable">
+        <thead>
+          <tr>
+            <th>날짜</th>
+            <th>계좌</th>
+            <th>구분</th>
+            <th>거래처/내용</th>
+            <th>입금</th>
+            <th>출금</th>
+            <th>비고</th>
+            <th>삭제</th>
+          </tr>
+        </thead>
+        <tbody id="txBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==============================
+     탭 2: 보고서
+============================== -->
+<div class="page" id="page-report">
+  <div class="report-wrap">
+    <div class="report-toolbar">
+      <div class="form-group" style="flex:0 0 auto;">
+        <label style="font-size:14px;font-weight:600;color:var(--text-muted);">보고 기간 (주간)</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="date" id="rpt-from" style="height:56px;border:1.5px solid var(--border);border-radius:8px;padding:0 14px;font-size:16px;font-family:inherit;outline:none;">
+          <span>~</span>
+          <input type="date" id="rpt-to" style="height:56px;border:1.5px solid var(--border);border-radius:8px;padding:0 14px;font-size:16px;font-family:inherit;outline:none;">
+        </div>
+      </div>
+      <div class="form-group" style="flex:0 0 auto;">
+        <label style="font-size:14px;font-weight:600;color:var(--text-muted);">내역 구분</label>
+        <select id="rpt-type" style="height:56px;border:1.5px solid var(--border);border-radius:8px;padding:0 14px;font-size:16px;font-family:inherit;outline:none;">
+          <option value="">전체</option>
+          <option value="입금">💙 입금만</option>
+          <option value="출금">❤️ 출금만</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex:0 0 auto;">
+        <label style="font-size:14px;font-weight:600;color:var(--text-muted);">보고서 양식</label>
+        <select id="rpt-format" style="height:56px;border:1.5px solid var(--border);border-radius:8px;padding:0 14px;font-size:16px;font-family:inherit;outline:none;">
+          <option value="formal">📋 공식 보고서</option>
+          <option value="simple">📋 추가 양식</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;margin-left:auto;align-items:flex-end;">
+        <button class="btn btn-primary" onclick="renderReport()">🔍 보고서 생성</button>
+        <button class="btn btn-outline" onclick="printReport()">🖨️ 인쇄 미리보기</button>
+        <button class="btn btn-outline" onclick="exportToWord()" style="border-color:#2b579a;color:#2b579a;">📄 Word 저장</button>
+      </div>
+    </div>
+    <div class="report-body" id="reportBody">
+      <div style="text-align:center;color:var(--text-muted);padding:60px 0;font-size:18px;">
+        📅 기간을 선택하고 <strong>보고서 생성</strong> 버튼을 눌러주세요
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==============================
+     탭 3: 내보내기
+============================== -->
+<div class="page" id="page-export">
+  <div class="card">
+    <div class="card-title">💾 엑셀 파일 다운로드</div>
+    <p style="font-size:16px;color:var(--text-muted);margin-bottom:20px;line-height:1.7;">
+      선택한 기간의 자금 내역을 <strong>엑셀(.xls)</strong> 파일로 내려받습니다.<br>
+      자금일보 양식에 맞게 시트가 구성됩니다.
+    </p>
+    <div class="filter-bar" style="margin-bottom:24px;flex-wrap:wrap;">
+      <label>기간:</label>
+      <input type="date" id="exp-from">
+      <span style="color:var(--text-muted)">~</span>
+      <input type="date" id="exp-to">
+      <select id="exp-account" style="height:40px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-size:15px;font-family:inherit;outline:none;cursor:pointer;">
+        <option value="">전체 계좌</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <button class="btn btn-green" onclick="exportExcel()">📥 엑셀 다운로드</button>
+      <button class="btn btn-outline" onclick="exportAllExcel()">📦 전체 데이터 다운로드</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏦 은행 거래내역 가져오기</div>
+    <p style="font-size:16px;color:var(--text-muted);margin-bottom:6px;line-height:1.8;">
+      은행 앱 또는 인터넷뱅킹에서 내려받은 <strong>거래내역 엑셀(.xlsx/.xls) 또는 CSV</strong> 파일을 불러옵니다.<br>
+      기업은행 · 농협 · 우리은행 형식을 자동으로 인식합니다.
+    </p>
+    <div style="background:var(--primary-light);border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:15px;color:var(--primary);line-height:1.8;">
+      📌 <strong>은행 앱에서 내보내는 방법</strong><br>
+      기업은행: 거래내역 조회 → 엑셀 저장<br>
+      농협: 거래내역 조회 → 내보내기 → 엑셀<br>
+      우리은행: 거래내역 → 파일저장(Excel)
+    </div>
+
+    <!-- 은행 선택 + 계좌 매핑 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;max-width:640px;">
+      <div class="form-group">
+        <label>은행 선택</label>
+        <select id="import-bank" style="height:56px;border:1.5px solid var(--border);border-radius:8px;padding:0 14px;font-size:16px;font-family:inherit;outline:none;">
+          <option value="ibk">기업은행 (IBK)</option>
+          <option value="nh">농협은행 (NH)</option>
+          <option value="woori">우리은행</option>
+          <option value="kb">국민은행 (KB)</option>
+          <option value="shinhan">신한은행</option>
+          <option value="auto">자동 감지</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>계좌 구분 (어느 계좌로 등록할지)</label>
+        <select id="import-account" style="height:56px;border:1.5px solid var(--border);border-radius:8px;padding:0 14px;font-size:16px;font-family:inherit;outline:none;"></select>
+      </div>
+    </div>
+
+    <!-- 안내 버튼 -->
+    <div style="margin-bottom:20px;">
+      <button class="btn btn-outline" onclick="openColModal()"
+        style="height:46px;font-size:15px;padding:0 20px;border-color:var(--primary);gap:8px;">
+        📋 은행별 엑셀 컬럼 구조 보기
+      </button>
+      <span style="font-size:14px;color:var(--text-muted);margin-left:12px;">내보내는 방법도 확인할 수 있어요</span>
+    </div>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+      <label class="btn btn-primary" style="cursor:pointer;">
+        📂 파일 선택 (xlsx / csv)
+        <input type="file" accept=".xlsx,.xls,.csv" onchange="importBankFile(event)" style="display:none;">
+      </label>
+    </div>
+
+    <!-- 미리보기 영역 -->
+    <div id="import-preview" style="display:none;margin-top:24px;">
+      <div style="font-size:17px;font-weight:700;margin-bottom:12px;color:var(--text);">📋 가져오기 미리보기</div>
+      <div id="import-summary" style="background:var(--success-light);border-radius:8px;padding:12px 16px;font-size:15px;color:var(--success);margin-bottom:14px;"></div>
+      <div class="table-wrap" style="max-height:320px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;">
+        <table>
+          <thead>
+            <tr>
+              <th>날짜</th><th>내용</th><th>입금</th><th>출금</th><th>잔액</th><th>포함</th>
+            </tr>
+          </thead>
+          <tbody id="import-tbody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;">
+        <button class="btn btn-green" onclick="confirmImport()">✅ 선택 항목 가져오기</button>
+        <button class="btn btn-outline" onclick="cancelImport()">❌ 취소</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🗄️ 데이터 관리</div>
+    <p style="font-size:15px;color:var(--text-muted);margin-bottom:16px;line-height:1.7;">
+      데이터는 PC에 자동 저장됩니다.<br>
+      백업/복원 기능으로 파일로 보관하거나 다른 PC로 이전할 수 있습니다.
+    </p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="backupData()">💾 JSON 백업</button>
+      <label class="btn btn-outline" style="cursor:pointer;">
+        📂 JSON 복원
+        <input type="file" accept=".json" onchange="restoreData(event)" style="display:none;">
+      </label>
+      <button class="btn btn-danger" onclick="clearAllData()">🗑️ 전체 삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==============================
+     탭 4: 설정
+============================== -->
+<div class="page" id="page-settings">
+  <div class="card">
+    <div class="card-title">⚙️ 계좌 설정</div>
+    <p style="font-size:16px;color:var(--text-muted);margin-bottom:6px;line-height:1.8;">
+      계좌 이름·계좌번호·기준잔액을 수정할 수 있습니다.<br>
+      기준잔액은 처음 사용 시 실제 잔액을 입력하면 이후 내역 기준으로 자동 계산됩니다.
+    </p>
+    <div style="background:var(--primary-light);border-radius:8px;padding:12px 16px;margin-bottom:24px;font-size:15px;color:var(--primary);">
+      💡 계좌 이름·번호는 자유롭게 수정하세요. 금액은 숫자만 입력 (콤마 자동 표시).
+    </div>
+    <div id="settings-form" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;"></div>
+    <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+      <button class="btn btn-primary" onclick="saveSettings()">✅ 저장</button>
+      <button class="btn btn-outline" onclick="renderSettingsForm()">🔄 되돌리기</button>
+      <button class="btn btn-outline" onclick="addAccountSetting()" style="margin-left:auto;border-color:var(--success);color:var(--success);">➕ 계좌 추가</button>
+    </div>
+  </div>
+
+  <!-- 결재란 설정 -->
+  <div class="card" style="margin-top:16px;">
+    <div class="card-title">📝 결재란 설정</div>
+    <p style="font-size:15px;color:var(--text-muted);margin-bottom:16px;">
+      보고서 상단 결재란에 표시될 항목 이름을 설정합니다.
+    </p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:480px;">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:6px;">항목 1</div>
+        <input id="approval-name1" type="text" placeholder="예: 담당"
+          style="width:100%;height:48px;border:1.5px solid var(--border);border-radius:8px;padding:0 14px;font-size:16px;font-family:inherit;outline:none;"
+          onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:6px;">항목 2</div>
+        <input id="approval-name2" type="text" placeholder="예: 이사"
+          style="width:100%;height:48px;border:1.5px solid var(--border);border-radius:8px;padding:0 14px;font-size:16px;font-family:inherit;outline:none;"
+          onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <button class="btn btn-primary" onclick="saveApprovalNames()">✅ 결재란 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==============================
+     은행 컬럼 안내 모달
+============================== -->
+<div class="modal-backdrop" id="colModal" onclick="closeColModalBackdrop(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="title">🏦 은행별 엑셀 파일 안내</span>
+      <button class="modal-close" onclick="closeColModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:15px;color:var(--text-muted);margin-bottom:18px;line-height:1.7;">
+        아래 탭에서 은행을 선택하면 엑셀 파일의 컬럼 순서와 내보내기 방법을 확인할 수 있습니다.
+      </p>
+
+      <!-- 은행 탭 -->
+      <div class="bank-tab-row" id="modalBankTabs"></div>
+
+      <!-- 내보내기 방법 -->
+      <div id="modalExportSteps" class="export-steps"></div>
+
+      <!-- 컬럼 테이블 -->
+      <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:12px;">📊 엑셀 컬럼 구조</div>
+      <div style="overflow-x:auto;">
+        <table class="col-table" id="modalColTable"></table>
+      </div>
+
+      <!-- 범례 -->
+      <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+        <span style="font-size:14px;color:var(--text-muted);font-weight:600;">컬럼 역할:</span>
+        <span class="col-role role-date">날짜</span>
+        <span class="col-role role-desc">내용/적요</span>
+        <span class="col-role role-in">입금</span>
+        <span class="col-role role-out">출금</span>
+        <span class="col-role role-bal">잔액</span>
+        <span class="col-role role-skip">참고(미사용)</span>
+      </div>
+
+      <div style="margin-top:24px;text-align:right;">
+        <button class="btn btn-primary" onclick="closeColModal()">확인</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div id="toast"></div>
+
+<script src="renderer/utils.js"></script>
+<script src="renderer/state.js"></script>
+<script src="renderer/accounts.js"></script>
+<script src="renderer/data.js"></script>
+<script src="renderer/render.js"></script>
+<script src="renderer/transactions.js"></script>
+<script src="renderer/settings.js"></script>
+<script src="renderer/bank-import.js"></script>
+<script src="renderer/export.js"></script>
+<script src="renderer/report.js"></script>
+<script src="renderer/app.js"></script>
+</body>
+</html>
