@@ -1,7 +1,7 @@
 {
   "name": "jafm",
   "productName": "자금일보 관리 시스템",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "소규모 기업용 자금일보 관리 프로그램",
   "main": "src/main.js",
   "author": "zaoLee",
@@ -22,9 +22,9 @@
     "electron-builder": "^24.0.0"
   },
   "build": {
-    "appId": "com.n2soft.jafm",
+    "appId": "com.zaolee.jafm",
     "productName": "자금일보",
-    "copyright": "Copyright © 2026 n2soft",
+    "copyright": "Copyright © 2026 zaoLee",
     "directories": {
       "output": "dist"
     },
