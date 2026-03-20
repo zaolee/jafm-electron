@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'v*'   # v1.0.1 처럼 태그 push 할 때만 빌드
+      - 'v*'
 
 jobs:
   build:
@@ -21,9 +21,18 @@ jobs:
       - name: 패키지 설치
         run: npm ci
 
-      - name: EXE 빌드 및 GitHub Release 업로드
+      - name: EXE 빌드
         run: npm run build:win
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EP_DRAFT: false
-          EP_PRE_RELEASE: false
+
+      - name: GitHub Release 생성 (자동 Publish)
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.exe
+            dist/latest.yml
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
