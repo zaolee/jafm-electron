@@ -5,7 +5,7 @@
   "description": "소규모 기업용 자금일보 관리 프로그램",
   "main": "src/main.js",
   "author": "zaoLee",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
