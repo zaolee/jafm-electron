@@ -1,0 +1,27 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'   # v1.0.1 처럼 태그 push 할 때만 빌드
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: 소스 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 패키지 설치
+        run: npm ci
+
+      - name: EXE 빌드 및 GitHub Release 업로드
+        run: npm run build:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

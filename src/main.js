@@ -3,6 +3,7 @@
 const { app, BrowserWindow, Menu, shell, dialog, ipcMain } = require('electron');
 const path = require('path');
 const fs   = require('fs');
+const { autoUpdater } = require('electron-updater');
 
 // ── 개발 모드 여부 ──────────────────────────
 const isDev = process.argv.includes('--dev');
@@ -258,9 +259,36 @@ ipcMain.handle('read-file', async (_e, { filePath }) => {
 });
 
 // ── 앱 생명주기 ─────────────────────────────
+// ── 자동 업데이트 ────────────────────────────
+function setupAutoUpdater() {
+  if (isDev) return; // 개발 모드에서는 실행 안 함
+
+  autoUpdater.checkForUpdatesAndNotify();
+
+  autoUpdater.on('update-available', () => {
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: '업데이트',
+      message: '새 버전이 있습니다. 백그라운드에서 다운로드합니다.',
+    });
+  });
+
+  autoUpdater.on('update-downloaded', () => {
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: '업데이트 준비 완료',
+      message: '업데이트가 준비되었습니다. 지금 재시작할까요?',
+      buttons: ['지금 재시작', '나중에'],
+    }).then(({ response }) => {
+      if (response === 0) autoUpdater.quitAndInstall();
+    });
+  });
+}
+
 app.whenReady().then(() => {
   buildMenu();
   createWindow();
+  setupAutoUpdater();
 
   // macOS: Dock 아이콘 클릭 시 창 재생성
   app.on('activate', () => {

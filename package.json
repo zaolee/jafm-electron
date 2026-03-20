@@ -13,6 +13,9 @@
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux"
   },
+  "dependencies": {
+    "electron-updater": "^6.1.0"
+  },
   "devDependencies": {
     "cross-env": "^10.1.0",
     "electron": "^29.0.0",
@@ -49,6 +52,11 @@
     "linux": {
       "target": "AppImage",
       "icon": "assets/icon.png"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "zaolee",
+      "repo": "jafm-electron"
     },
     "nsis": {
       "oneClick": false,
